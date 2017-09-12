@@ -1,0 +1,17 @@
+0 hours 0 minutes spent this session
+2017-01-06
+I hereby certify that all the work in this commit is my own except for 
+materials distributed as part of this class.
+/* do not change the format of anything above this line */
+
+After each work session, please edit and commit this file, updating the
+first two lines with the amount of time you spent working and the date
+when you stopped.  You may also record any notes you wish to make about
+what you did during the session.
+
+Every commit of this file constitutes a work log entry.  Each entry
+should replace the previous one, so there will only be one session
+recorded at any particular version of this file.  Do *not* change the
+format of the first four lines, as the course staff will use
+automated tools to track the amount of time students spend on each
+problem set.
