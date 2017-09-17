@@ -9,14 +9,16 @@
 
 ;; DATA DEFINITIONS
 ;; A Speed is represented as NonNegInt in FLOPS/s
-;; which means the number of floating point operations per second.
+;; which means the number of floating point operations that
+;; a microprocessor can perform per second.
+
 ;; A Years is represented as NonNegReal
 ;; indicates the number of 365-day years
 
 ;; CONSTANTS
-;; A ADDTIONS is represented as a Constant
+;; A ADDTIONS is represented as a Constant PosInt
 ;; INTERP:
-;; The numbers of addtions need to test when
+;; The number of addtions needed to test when
 ;; testing the double prision addtion operation of Java double type
 ;; (i.e. 2^128)
 (define ADDTIONS (expt 2 128))
@@ -24,16 +26,19 @@
 ;; years-to-test: Speed -> Years
 ;; GIVEN: the speed of a microprocessor.
 ;; RETURNS: the years the microprocessor would take to test
-;; the double prision addition operation involving 2^128 additions(i.e. Java double type).
+;; the double prision addition operation involving 2^128 additions
+;; (i.e. Java double type).
 ;; EXAMPLES:
 ;; (years-to-test (expt 2 128)) => 1/31536000
 ;; (years-to-test (expt 2 100)) => 8.51203247
 ;; (years-to-test (expt 2 93)) => 1089.54015626
 
 ;; DATA STRATEGY: Transcribe Formula and combine simpler fuctions
+
 (define (years-to-test speed)
   (seconds-to-years (/ ADDTIONS speed)))
 
+;;Tolerance scope to 0.00000001 
 (begin-for-test
   (check-= (years-to-test (expt 2 128)) 1/31536000 0.00000001)
   (check-= (years-to-test (expt 2 100)) 8.51203247 0.00000001)
