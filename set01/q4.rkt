@@ -14,10 +14,10 @@
 
 
 ;; CONSTANTS
-;; A SECONDS-YEAR is representedd as PosInteger in second
+;; A SECONDS-OF-YEAR is representedd as PosInteger in second
 ;; INTERP
-;; The total seconds that a 365-days year contain.
-(define SECONDS-YEAR (* 365 24 60 60))
+;; The total seconds that a 365-days year contains.
+(define SECONDS-OF-YEAR (* 365 24 60 60))
 
 ;; flopy: Speed -> NonNegInt
 ;; GIVEN: the speed of a microprocessor.
@@ -31,7 +31,7 @@
 ;; DESIGN STRATEGY: Transcribe Formula
 
 (define (flopy speed)
-  (* speed SECONDS-YEAR))
+  (* speed SECONDS-OF-YEAR))
 
 ;; TESTS
 (begin-for-test

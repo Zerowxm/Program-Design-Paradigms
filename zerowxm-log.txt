@@ -1,5 +1,5 @@
-2 hours 45 minutes spent this session
-2017-09-17
+0 hours 10 minutes spent this session
+2017-09-18
 I hereby certify that all the work in this commit is my own except for 
 materials distributed as part of this class.
 /* do not change the format of anything above this line */
@@ -9,6 +9,7 @@ NOTE(sorted by time)£º
 2. finished q4
 3. watch paizza and learn more about the rules and request as well as working on q5
 4. finished q5 and program review for all code
+5. recover dracket file
 
 After each work session, please edit and commit this file, updating the
 first two lines with the amount of time you spent working and the date
