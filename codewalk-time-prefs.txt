@@ -14,52 +14,52 @@ your preferences.  To ensure that we can find a time that works for you, use
 a 0 score *only* if you absolutely cannot come to a code walk at that time.
 
 
-TA) Tuesday 09:00-09:59 - 5
-TB) Tuesday 10:00-10:59 - 5
-TC) Tuesday 11:00-11:59 - 5
-TD) Tuesday 12:00-12:59 - 5
-TE) Tuesday 13:00-13:59 - 5
-TF) Tuesday 14:00-14:59 - 5
-TG) Tuesday 15:00-15:59 - 5
-TH) Tuesday 16:00-16:59 - 5
+TA) Tuesday 09:00-09:59 - 1
+TB) Tuesday 10:00-10:59 - 1
+TC) Tuesday 11:00-11:59 - 1
+TD) Tuesday 12:00-12:59 - 1
+TE) Tuesday 13:00-13:59 - 1
+TF) Tuesday 14:00-14:59 - 1
+TG) Tuesday 15:00-15:59 - 1
+TH) Tuesday 16:00-16:59 - 1
 
-TI) Tuesday 18:00-18:59 - 5
-TJ) Tuesday 19:00-19:59 - 5
+TI) Tuesday 18:00-18:59 - 0
+TJ) Tuesday 19:00-19:59 - 0
 TK) Tuesday 20:00-20:59 - 5
 TL) Tuesday 21:00-21:59 - 5
 
-WA) Wednesday 09:00-09:59 - 5
-WB) Wednesday 10:00-10:59 - 5
-WC) Wednesday 11:00-11:59 - 5
-WD) Wednesday 12:00-12:59 - 5
-WE) Wednesday 13:00-13:59 - 5
-WF) Wednesday 14:00-14:59 - 5
-WG) Wednesday 15:00-15:59 - 5
+WA) Wednesday 09:00-09:59 - 1
+WB) Wednesday 10:00-10:59 - 1
+WC) Wednesday 11:00-11:59 - 1
+WD) Wednesday 12:00-12:59 - 1
+WE) Wednesday 13:00-13:59 - 1
+WF) Wednesday 14:00-14:59 - 1
+WG) Wednesday 15:00-15:59 - 1
 
-WH) Wednesday 20:00-20:59 - 5
+WH) Wednesday 20:00-20:59 - 0
 WI) Wednesday 21:00-21:59 - 5
 
 RA) Thursday 09:00-09:59 - 5
-RB) Thursday 10:00-10:59 - 5
-RC) Thursday 11:00-11:59 - 5
-RD) Thursday 12:00-12:59 - 5
-RE) Thursday 13:00-13:59 - 5
-RF) Thursday 14:00-14:59 - 5
-RG) Thursday 15:00-15:59 - 5
+RB) Thursday 10:00-10:59 - 10
+RC) Thursday 11:00-11:59 - 0
+RD) Thursday 12:00-12:59 - 0
+RE) Thursday 13:00-13:59 - 0
+RF) Thursday 14:00-14:59 - 1
+RG) Thursday 15:00-15:59 - 1
 
-RH) Thursday 18:00-18:59 - 5
-RI) Thursday 19:00-19:59 - 5
-RJ) Thursday 20:00-20:59 - 5
-RK) Thursday 21:00-21:59 - 5
+RH) Thursday 18:00-18:59 - 1
+RI) Thursday 19:00-19:59 - 1
+RJ) Thursday 20:00-20:59 - 1
+RK) Thursday 21:00-21:59 - 1
 
-FA) Friday 09:50-10:49 - 5
-FB) Friday 10:50-11:49 - 5
-FC) Friday 12:15-13:14 - 5
-FD) Friday 13:15-14:14 - 5
-FE) Friday 14:15-15:14 - 5
+FA) Friday 09:50-10:49 - 1
+FB) Friday 10:50-11:49 - 1
+FC) Friday 12:15-13:14 - 1
+FD) Friday 13:15-14:14 - 1
+FE) Friday 14:15-15:14 - 1
 
-FF) Friday 17:00-17:59 - 5
-FG) Friday 18:00-18:59 - 5
-FH) Friday 19:00-19:59 - 5
-FI) Friday 20:00-20:59 - 5
-FJ) Friday 21:00-21:59 - 5
+FF) Friday 17:00-17:59 - 1
+FG) Friday 18:00-18:59 - 1
+FH) Friday 19:00-19:59 - 1
+FI) Friday 20:00-20:59 - 1
+FJ) Friday 21:00-21:59 - 1
