@@ -1,11 +1,12 @@
-3 hours 30 minutes spent this session
-2017-09-21
+1 hours 1 minutes spent this session
+2017-09-22
 I hereby certify that all the work in this commit is my own except for 
 materials distributed as part of this class.
 /* do not change the format of anything above this line */
 
 NOTE(sorted by time)£º
 1. finished q1 lexer-stuck? and find it full of many tricks
+2. finished all of q1 as well as commenting, testing, reviewing
 
 After each work session, please edit and commit this file, updating the
 first two lines with the amount of time you spent working and the date
