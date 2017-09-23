@@ -13,14 +13,12 @@
  lexer-shift
  lexer-reset)
 
-
-
 (check-location "02" "q1.rkt")
 
 ;; A Lexer is a stuct (make-lexer token input) with fields 
-;; token: String    strings with an assigned and thus identified meaning of the input of a lexer
-;; input: String    user input to a lexer
-;; more information about lexer if you want to know visit
+;; token: String(any string will do)     strings with an assigned and thus identified meaning of the input of a lexer
+;; input: String(any string will do)     user input to a lexer
+;; more information about lexer if you want to know, visit
 ;; https://en.wikipedia.org/wiki/Lexical_analysis
 
 (define-struct lexer (token input))
@@ -61,19 +59,16 @@
 ;;; GIVEN: an arbitrary string
 ;;; RETURNS: a Lexer lex whose token string is empty
 ;;;     and whose input string is the given string
-;;;
+;;; STRATEGY: Use constructor template for Lexer
 (define (initial-lexer input)
   (make-lexer "" input))
-(define letter "asb")
-(define symbol "!@#$")
-(define number "12312")
 
 (begin-for-test
   (check-equal? (lexer-token (make-lexer "abc" "1234")) "abc")
   (check-equal? (lexer-input (make-lexer "abc" "1234")) "1234")
-  (check-equal? (initial-lexer letter) (make-lexer "" letter))
-  (check-equal? (initial-lexer number) (make-lexer "" number))
-  (check-equal? (initial-lexer symbol) (make-lexer "" symbol))
+  (check-equal? (initial-lexer "asb") (make-lexer "" "asb"))
+  (check-equal? (initial-lexer "12312") (make-lexer "" "12312"))
+  (check-equal? (initial-lexer "!@#$") (make-lexer "" "!@#$"))
   )
 ;;; lexer-stuck? : Lexer -> Boolean
 ;;; GIVEN: a Lexer
@@ -84,11 +79,7 @@
 ;;;     (lexer-stuck? (make-lexer "abc" "1234"))  =>  false
 ;;;     (lexer-stuck? (make-lexer "abc" "+1234"))  =>  true
 ;;;     (lexer-stuck? (make-lexer "abc" ""))  =>  true
-
-;; test data
-(define lexer-empty (make-lexer "abc" ""))
-(define lexer-letter (make-lexer "abc" "h@@@"))
-(define lexer-digit (make-lexer "abc" "2dd"))
+;;; STRATEGY: combine simpler functions
 
 (define (lexer-stuck? l)
   ( if (non-empty-input? l)
@@ -96,37 +87,44 @@
        true ))
 
 ;; non-empty-input?: Lexer => Boolen
-;; RETURNS: true iff the input of given lexer is not empty
+;; RETURNS: true iff the input of the given lexer is not empty
+;; STRATEGY: Use obserber template for Lexer
 (define (non-empty-input? l)
   (< 0 (string-length (lexer-input l))))
 
 ;; begin-letter-or-digit?: String -> Boolen
 ;; GIVEN: String any string will do
 ;; RETURNS: true iff the first char of the given string is English letter or digit
-;; STRATEGY: combile simpler functions
+;; STRATEGY: combine simpler functions
 (define (begin-letter-or-digit? str)
   (or (letter? str)
       (digit? str)))
 ;; letter?: String->Boolen
-;; RETURNS: true iff the first char of string is English letter.
+;; RETURNS: true iff the first char of the given string is English letter.
+;; STRATEGY: if the first char of string is English letter return true
 (define (letter? str)
-  (char-alphabetic? (first-char str) ))
+  (string-alphabetic? (first-char str) ))
 
 ;; first-char: String -> Char
 ;; RETURNS: the first char of the given string.
 (define (first-char str)
-  (string-ref str 0))
+  (string-ith str 0))
 
 ;; digit?: String -> Boolen
-;; RETURNS: true iff the first char is digit.
+;; RETURNS: true iff the first char of the given string is digit.
+;; STRATEGY: if the first char of string is digit return true
 (define (digit? str)
-  (number? (string->number (substring str 0 1))))
-  
+  (string-numeric?(first-char str)))
+
+;; test data
+(define lexer-empty (make-lexer "eqw" ""))
+(define lexer-letter (make-lexer "eff" "h@@@"))
+(define lexer-digit (make-lexer "" "2dd"))
 ;; TESTS
 (begin-for-test
   (check-equal? (lexer-stuck? (make-lexer "abc" "1234")) false)
   (check-equal? (lexer-stuck? (make-lexer "abc" "+1234")) true)
-  (check-equal? (lexer-stuck? (make-lexer "abc" "")) true)
+  (check-equal? (lexer-stuck? (make-lexer "abc" "%$%f  sd#")) true)
   (check-equal? (lexer-stuck?  lexer-empty) true)
   (check-equal? (lexer-stuck?  lexer-letter) false)
   (check-equal? (lexer-stuck?  lexer-digit) false)
@@ -137,12 +135,12 @@
 ;;; GIVEN: a Lexer
 ;;; RETURNS:
 ;;;   If the given Lexer is stuck, returns the given Lexer.
-;;;   If the given Lexer is not stuck, A(then the token string
+;;;   If the given Lexer is not stuck,then the token string
 ;;;       of the result consists of the characters of the given
 ;;;       Lexer's token string followed by the first character
-;;;       of that Lexer's input string), and B(the input string
+;;;       of that Lexer's input string, and the input string
 ;;;       of the result consists of all but the first character
-;;;       of the given Lexer's input string).
+;;;       of the given Lexer's input string.
 ;;; EXAMPLES:
 ;;;     (lexer-shift (make-lexer "abc" ""))
 ;;;         =>  (make-lexer "abc" "")
@@ -154,20 +152,20 @@
 (define (lexer-shift l)
   (if (lexer-stuck? l)
       l
-      (shift l)))
-;; shift: Lexer -> Lexer
-;; RETURNS: A and B (shown above)
-(define (shift l)
-  (make-lexer (new-token l) (new-input l)))
+      (make-lexer (new-token l) (new-input l))))
 
-;; new-token: Lexer->Lexer
-;; RETURNS: A (shown above)
+
+;; new-token: Lexer -> String
+;; RETURNS: the token string consists of the characters of the given
+;;          Lexer's token string followed by the first character
+;;          of that Lexer's input string
 (define (new-token l)
   (string-append (lexer-token l)
-                (substring (lexer-input l) 0 1)))
+                (first-char (lexer-input l))))
 
-;; new-input: Lexer->Lexer
-;; RETURNS: B (shown above)
+;; new-input: Lexer -> String
+;; RETURNS: the input string consists of all but the first character
+;;          of the given Lexer's input string
 (define (new-input l)
   (substring (lexer-input l) 1))
 
@@ -197,8 +195,9 @@
       (create-empty-token (new-input l))
       (create-empty-token "")))
 
-;; create-empty-token: String->Lexer
+;; create-empty-token: String -> Lexer
 ;; RETURNS: new lexer with the given input and empty token
+;; STRATEGY: Use constructor template for Lexer
 (define (create-empty-token input)
   (make-lexer "" input))
 
