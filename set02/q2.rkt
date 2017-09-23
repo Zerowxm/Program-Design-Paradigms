@@ -41,10 +41,10 @@
   )
   
 ;;; initial-state : PosInt -> ChineseTrafficSignal
-;;; GIVEN: an integer n greater than 3
+;;; GIVEN:   an integer n greater than 3
 ;;; RETURNS: a representation of a Chinese traffic signal
-;;;     at the beginning of its red state, which will last
-;;;     for n seconds
+;;;          at the beginning of its red state, which will last
+;;;          for n seconds
 ;;; EXAMPLE:
 ;;;     (is-red? (initial-state 4))  =>  true
 ;;; STRATEGY: Use constructor template for ChineseTrafficSignal
@@ -52,9 +52,9 @@
   (make-signal "red" t t))
 
 ;;; next-state : ChineseTrafficSignal -> ChineseTrafficSignal
-;;; GIVEN: a representation of a traffic signal in some state
+;;; GIVEN:   a representation of a traffic signal in some state
 ;;; RETURNS: the state that traffic signal should have one
-;;;     second later
+;;;          second later
 ;;; STRATEGY: Combine simpler functions and cases if the signal is red or not
 (define (next-state sg)
   (if (equal? "red" (signal-color sg))
@@ -65,7 +65,7 @@
 ;; red-next: ChineseTrafficSignal -> ChineseTrafficSignal
 ;; RETURNS:  the state that the given red signal should have one second later
 ;; STRATEGY: Cases if left time of signal is 1 then turn green otherwise still red
-;; and use template for ChineseTrafficSignal
+;;           and use template for ChineseTrafficSignal
 (define (red-next sg)
   (let ([durtime (signal-durtime sg)] [left-time (signal-left-time sg)])
     (if(= 1 left-time)
@@ -73,9 +73,9 @@
        (make-signal "red" durtime (- left-time 1)))))
 
 ;; non-red-next: ChineseTrafficSignal -> ChineseTrafficSignal
-;; RETURNS: the state that the given non-red signal(green&blank) should have one second later
+;; RETURNS:  the state that the given non-red signal(green&blank) should have one second later
 ;; STRATEGY: Cases on the left-time of non-red signal
-;; and use template for ChineseTrafficSignal
+;;           and use template for ChineseTrafficSignal
 (define (non-red-next sg)
   (let ([left (signal-left-time sg)] [durtime (signal-durtime sg)])
     (cond
@@ -85,7 +85,7 @@
       )))
 
 ;;; is-red? : ChineseTrafficSignal -> Boolean
-;;; GIVEN: a representation of a traffic signal in some state
+;;; GIVEN:   a representation of a traffic signal in some state
 ;;; RETURNS: true if and only if the signal is red
 ;;; EXAMPLES:
 ;;;     (is-red? (next-state (initial-state 4)))  =>  true
@@ -159,7 +159,7 @@
      )
 
 ;;; is-green? : ChineseTrafficSignal -> Boolean
-;;; GIVEN: a representation of a traffic signal in some state
+;;; GIVEN:   a representation of a traffic signal in some state
 ;;; RETURNS: true if and only if the signal is green
 ;;; EXAMPLES:
 ;;;     (is-green?

@@ -38,7 +38,7 @@
 
 
 ;;; make-lexer : String String -> Lexer
-;;; GIVEN: two strings s1 and s2
+;;; GIVEN: two strings s1 and s2(any string will do)
 ;;; RETURNS: a Lexer whose token string is s1
 ;;;     and whose input string is s2
 ;;;
@@ -56,7 +56,7 @@
 ;;;
 
 ;;; initial-lexer : String -> Lexer
-;;; GIVEN: an arbitrary string
+;;; GIVEN: an arbitrary string(any string will do)
 ;;; RETURNS: a Lexer lex whose token string is empty
 ;;;     and whose input string is the given string
 ;;; STRATEGY: Use constructor template for Lexer
@@ -93,7 +93,7 @@
   (< 0 (string-length (lexer-input l))))
 
 ;; begin-letter-or-digit?: String -> Boolen
-;; GIVEN: String any string will do
+;; GIVEN: String(any string will do)
 ;; RETURNS: true iff the first char of the given string is English letter or digit
 ;; STRATEGY: combine simpler functions
 (define (begin-letter-or-digit? str)
@@ -101,13 +101,14 @@
       (digit? str)))
 
 ;; letter?: String->Boolen
-;; RETURNS: true iff the first char of the given string is English letter.
+;; RETURNS: true iff the first char of the given string(any string will do)
+;;          is English letter.
 ;; STRATEGY: if the first char of string is English letter return true
 (define (letter? str)
   (string-alphabetic? (first-char str) ))
 
-;; first-char: String -> Char
-;; RETURNS: the first char of the given string.
+;; first-char: String -> String
+;; RETURNS: the first char of the given string(any string will do).
 (define (first-char str)
   (string-ith str 0))
 
@@ -195,7 +196,7 @@
       (create-empty-token "")))
 
 ;; create-empty-token: String -> Lexer
-;; RETURNS: new lexer with the given input and empty token
+;; RETURNS: a new lexer with the given input string(any string will do) and empty token
 ;; STRATEGY: Use constructor template for Lexer
 (define (create-empty-token input)
   (make-lexer "" input))
