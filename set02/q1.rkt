@@ -99,6 +99,7 @@
 (define (begin-letter-or-digit? str)
   (or (letter? str)
       (digit? str)))
+
 ;; letter?: String->Boolen
 ;; RETURNS: true iff the first char of the given string is English letter.
 ;; STRATEGY: if the first char of string is English letter return true
@@ -129,7 +130,6 @@
   (check-equal? (lexer-stuck?  lexer-letter) false)
   (check-equal? (lexer-stuck?  lexer-digit) false)
   )
- 
           
 ;;; lexer-shift : Lexer -> Lexer
 ;;; GIVEN: a Lexer
@@ -154,14 +154,13 @@
       l
       (make-lexer (new-token l) (new-input l))))
 
-
 ;; new-token: Lexer -> String
 ;; RETURNS: the token string consists of the characters of the given
 ;;          Lexer's token string followed by the first character
 ;;          of that Lexer's input string
 (define (new-token l)
   (string-append (lexer-token l)
-                (first-char (lexer-input l))))
+                 (first-char (lexer-input l))))
 
 ;; new-input: Lexer -> String
 ;; RETURNS: the input string consists of all but the first character

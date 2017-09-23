@@ -21,7 +21,7 @@
 ;; INTERP: self-evident
 
 ;; A ChineseTrafficSignal is a struct (make-signal color durtime left-time) with following fileds
-;; color:    Color            represents the current color of the traffic light
+;; color:     Color           represents the current color of the traffic light
 ;; durtime:   PosInteger      represents the initial last time for the current color in seconds
 ;; left-time: PosInteger      represents the left time for the current color in seconds
 
@@ -62,27 +62,27 @@
       (non-red-next sg)
       ))
 
-;; non-red-next: ChineseTrafficSignal -> ChineseTrafficSignal
-;; RETURNS: the state that the given non-red signal(green&blank) should have one second later
-;; STRATEGY: Cases on the left-time of non-red signal
-;; and use template for ChineseTrafficSignal
-(define (non-red-next sg)
-  (let ([left (signal-left-time sg)] [dur (signal-durtime sg)])
-    (cond
-      [(or (= 4 left) (= 2 left)) (make-signal "blank" dur (- left 1))]
-      [(= 3 left) (make-signal "green" dur (- left 1))]
-      [(= 1 left) (make-signal "red" dur dur)]
-      )))
-
 ;; red-next: ChineseTrafficSignal -> ChineseTrafficSignal
 ;; RETURNS:  the state that the given red signal should have one second later
 ;; STRATEGY: Cases if left time of signal is 1 then turn green otherwise still red
 ;; and use template for ChineseTrafficSignal
 (define (red-next sg)
-  (let ([t (signal-durtime sg)])
-     (if(= 1 (signal-left-time sg))
-     (make-signal "green" t t)
-     (make-signal "red" t (- (signal-left-time sg) 1)))))
+  (let ([durtime (signal-durtime sg)] [left-time (signal-left-time sg)])
+    (if(= 1 left-time)
+       (make-signal "green" durtime durtime)
+       (make-signal "red" durtime (- left-time 1)))))
+
+;; non-red-next: ChineseTrafficSignal -> ChineseTrafficSignal
+;; RETURNS: the state that the given non-red signal(green&blank) should have one second later
+;; STRATEGY: Cases on the left-time of non-red signal
+;; and use template for ChineseTrafficSignal
+(define (non-red-next sg)
+  (let ([left (signal-left-time sg)] [durtime (signal-durtime sg)])
+    (cond
+      [(or (= 4 left) (= 2 left)) (make-signal "blank" durtime (- left 1))]
+      [(= 3 left) (make-signal "green" durtime (- left 1))]
+      [(= 1 left) (make-signal "red" durtime durtime)]
+      )))
 
 ;;; is-red? : ChineseTrafficSignal -> Boolean
 ;;; GIVEN: a representation of a traffic signal in some state
