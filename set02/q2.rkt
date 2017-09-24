@@ -66,16 +66,30 @@
 ;; RETURNS:  the state that the given red signal should have one second later
 ;; STRATEGY: Cases if left time of signal is 1 then turn green otherwise still red
 ;;           and use template for ChineseTrafficSignal
+;; EXAMPLES:
+;; (red-next (initial-state 4)) => (make-signal "red" 4 3)
+;; (red-next (make-signal "red" 4 1)) => (make-signal "green" 4 4)
 (define (red-next sg)
   (let ([durtime (signal-durtime sg)] [left-time (signal-left-time sg)])
     (if(= 1 left-time)
        (make-signal "green" durtime durtime)
        (make-signal "red" durtime (- left-time 1)))))
 
+;; TESTS
+(begin-for-test
+  (check-equal? (red-next (initial-state 4)) (make-signal "red" 4 3))
+  (check-equal? (red-next (make-signal "red" 4 1)) (make-signal "green" 4 4))
+  )
+  
+
 ;; non-red-next: ChineseTrafficSignal -> ChineseTrafficSignal
 ;; RETURNS:  the state that the given non-red signal(green&blank) should have one second later
-;; STRATEGY: Cases on the left-time of non-red signal
+;; STRATEGY: Cases on the left-time of non-red signal if time == 4 or 2 color turns blank
+;;           if time = 3 color turns green and time == 1 turns red
 ;;           and use template for ChineseTrafficSignal
+;; EXAMPLES:
+;; (non-red-next (make-signal "green" 4 2)) => (make-signal "blank" 4 1) 
+;; (non-red-next (make-signal "blank" 4 1)) => (make-signal "red" 4 4) 
 (define (non-red-next sg)
   (let ([left (signal-left-time sg)] [durtime (signal-durtime sg)])
     (cond
@@ -83,6 +97,12 @@
       [(= 3 left) (make-signal "green" durtime (- left 1))]
       [(= 1 left) (make-signal "red" durtime durtime)]
       )))
+
+;; TESTS
+(begin-for-test
+  (check-equal? (non-red-next (make-signal "green" 4 2)) (make-signal "blank" 4 1) )
+  (check-equal? (non-red-next (make-signal "blank" 4 1)) (make-signal "red" 4 4))
+  )
 
 ;;; is-red? : ChineseTrafficSignal -> Boolean
 ;;; GIVEN:   a representation of a traffic signal in some state

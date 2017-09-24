@@ -83,27 +83,59 @@
 
 (define (lexer-stuck? l)
   ( if (non-empty-input? l)
-       (not (begin-letter-or-digit? (lexer-input l)))
+       (not (begin-with-letter-or-digit? (lexer-input l)))
        true ))
+;; test data
+(define lexer-input-empty (make-lexer "eqw" ""))
+(define lexer-input-begin-letter (make-lexer "eff" "h@@@"))
+(define lexer-input-begin-digit (make-lexer "" "2dd"))
+;; TESTS
+(begin-for-test
+  (check-equal? (lexer-stuck? (make-lexer "abc" "1234")) false)
+  (check-equal? (lexer-stuck? (make-lexer "abc" "+1234")) true)
+  (check-equal? (lexer-stuck? (make-lexer "abc" "%$%f  sd#")) true)
+  (check-equal? (lexer-stuck?  lexer-input-empty) true)
+  (check-equal? (lexer-stuck?  lexer-input-begin-letter) false)
+  (check-equal? (lexer-stuck?  lexer-input-begin-digit) false)
+  )
 
 ;; non-empty-input?: Lexer => Boolen
 ;; RETURNS: true iff the input of the given lexer is not empty
 ;; STRATEGY: Use obserber template for Lexer
+;; EXAMPLES: 
+;; (non-empty-input? (make-lexer "abc" "1234")) => false
+;; (non-empty-input? (make-lexer "abc" "")) => true
 (define (non-empty-input? l)
   (< 0 (string-length (lexer-input l))))
+(begin-for-test
+  (check-equal? (non-empty-input? (make-lexer "abc" "1234")) true)
+  (check-equal? (non-empty-input? (make-lexer "abc" "")) false)
+  )
 
-;; begin-letter-or-digit?: String -> Boolen
+;; begin-with-letter-or-digit?: String -> Boolen
 ;; GIVEN: String(any string will do)
 ;; RETURNS: true iff the first char of the given string is English letter or digit
 ;; STRATEGY: combine simpler functions
-(define (begin-letter-or-digit? str)
+;; EXAMPLES:
+;; (begin-with-letter-or-digit? "dass") => true
+;; (begi-withn-letter-or-digit? "1das") => true
+;; (begin-with-letter-or-digit? "!@") => false
+(define (begin-with-letter-or-digit? str)
   (or (letter? str)
       (digit? str)))
+(begin-for-test
+  (check-equal? (begin-with-letter-or-digit? "dass") true)
+  (check-equal? (begin-with-letter-or-digit? "1das") true)
+  (check-equal? (begin-with-letter-or-digit? "!@") false)
+  )
 
 ;; letter?: String->Boolen
 ;; RETURNS: true iff the first char of the given string(any string will do)
 ;;          is English letter.
 ;; STRATEGY: if the first char of string is English letter return true
+;; EXAMPLES:
+;; (letter? "dass") => true
+;; (letter? "1das") => false
 (define (letter? str)
   (string-alphabetic? (first-char str) ))
 
@@ -115,22 +147,11 @@
 ;; digit?: String -> Boolen
 ;; RETURNS: true iff the first char of the given string is digit.
 ;; STRATEGY: if the first char of string is digit return true
+;; EXAMPLES:
+;; (digit? "dass") => false
+;; (digit? "1das") => true
 (define (digit? str)
   (string-numeric?(first-char str)))
-
-;; test data
-(define lexer-empty (make-lexer "eqw" ""))
-(define lexer-letter (make-lexer "eff" "h@@@"))
-(define lexer-digit (make-lexer "" "2dd"))
-;; TESTS
-(begin-for-test
-  (check-equal? (lexer-stuck? (make-lexer "abc" "1234")) false)
-  (check-equal? (lexer-stuck? (make-lexer "abc" "+1234")) true)
-  (check-equal? (lexer-stuck? (make-lexer "abc" "%$%f  sd#")) true)
-  (check-equal? (lexer-stuck?  lexer-empty) true)
-  (check-equal? (lexer-stuck?  lexer-letter) false)
-  (check-equal? (lexer-stuck?  lexer-digit) false)
-  )
           
 ;;; lexer-shift : Lexer -> Lexer
 ;;; GIVEN: a Lexer
@@ -159,6 +180,9 @@
 ;; RETURNS: the token string consists of the characters of the given
 ;;          Lexer's token string followed by the first character
 ;;          of that Lexer's input string
+;; STRATEGY: combine simpler functions
+;; EXAMPLES:
+;; (new-token (make-lexer "abc" "1234")) => "abc1"
 (define (new-token l)
   (string-append (lexer-token l)
                  (first-char (lexer-input l))))
@@ -166,6 +190,9 @@
 ;; new-input: Lexer -> String
 ;; RETURNS: the input string consists of all but the first character
 ;;          of the given Lexer's input string
+;; STRATEGY: use template of Lexer
+;; EXAMPLES:
+;; (new-input "1234") => "234"
 (define (new-input l)
   (substring (lexer-input l) 1))
 

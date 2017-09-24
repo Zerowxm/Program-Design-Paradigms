@@ -32,5 +32,5 @@
   (check-equal? (pyramid-volume 10.1 5.4) 183.618)
   (check-equal? (pyramid-volume 0 5) 0)
   (check-equal? (pyramid-volume 1 2) 2/3)
-  (check-equal? (pyramid-volume 23 11) 1939.6)
+  (check-equal? (pyramid-volume 23 11) 5819/3)
   )
