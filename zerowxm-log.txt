@@ -1,5 +1,5 @@
-0 hours 40 minutes spent this session
-2017-09-24
+0 hours 20 minutes spent this session
+2017-09-25
 I hereby certify that all the work in this commit is my own except for 
 materials distributed as part of this class.
 /* do not change the format of anything above this line */
@@ -11,6 +11,7 @@ NOTE(sorted by time)£º
 4. reviewed all code
 5. better the string comments
 6. add more examples and test on help functions
+7. simple the function of non-red-next.
 
 After each work session, please edit and commit this file, updating the
 first two lines with the amount of time you spent working and the date
