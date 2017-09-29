@@ -1,0 +1,36 @@
+TA-1 Name: - Preethi Chavely
+TA-2 Name: - Rahul Verma
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set02
+Question Codewalked: - q2 and q1
+
+Design Grade: - A
+Presentation Grade: - A
+
+================
+
+Data Design:
+
+-- missing interpretation.  
+
+================
+
+Contract/Purpose Statement/Design Strategy:
+
+-- incomplete purpose statements.
+
+================
+
+Presentation:
+
+-- student has no difficulty answering questions
+
+================
+
+Other:
+
+-- Be consistent with data type names. PosInteger and PosInt.
+-- Give a line saying that the built-in types are implicit for a struct in q1
+================
