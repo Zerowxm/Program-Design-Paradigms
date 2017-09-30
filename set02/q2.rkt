@@ -33,6 +33,7 @@
 
 ;; OBSERVER TEMPLATE
 ;; signal-fn: ChineseTrafficSignal -> ??
+
 (define (signal-fn sg)
   (...
    (signal-color sg)
