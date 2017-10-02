@@ -6,6 +6,24 @@
 (require 2htdp/image)
 (require "extras.rkt")
 (provide
+  simulation 
+  initial-world
+  world-ready-to-serve?
+  world-after-tick
+  world-after-key-event
+  world-ball
+ world-racket
+ ball-x
+ ball-y
+ racket-x
+ racket-y
+ ball-vx
+ ball-vy
+ racket-vx
+ racket-vy 
+ world-after-mouse-event
+ racket-after-mouse-event
+ racket-selected?
  )
 
 (check-location "03" "q2.rkt")
@@ -483,8 +501,10 @@
 ; Strategy: cases on whether the world is no longer in rally
 (define (rally-end? w)
   (let ([b (world-ball w)] [r (world-racket w)])
-    (or (racket-collide-top-wall? r)
-        (ball-collide-back-wall? b))))
+    (if (equal? PAUSE (world-state w))
+      false
+      (or (racket-collide-top-wall? r)
+        (ball-collide-back-wall? b)))))
 ; Tests
 (begin-for-test 
   (check-equal? (rally-end? world-to-end) true "the world should end"))
@@ -785,28 +805,31 @@
 ; helper functions on collision
 ; collide-y? : Ball Racket -> Bollean
 ; Given: a ball and a racket
-; Returns: true the pos-y of racket is between 
-; the start y the end y during a tick of the ball
-; Strategy: formula 
+; Returns: true l
+; Strategy: formula the pos-y of racket is between 
+; the start y the end y during a tick of the bal
 (define (collide-y? b r)
   (or (< (ball-y b) (racket-y r) (+ (ball-y b) (ball-vy b)))
       (> (ball-y b) (racket-y r) (+ (ball-y b) (ball-vy b)))))
-
+; collide-x? : Ball Racket -> Bollean
+; Given: a ball and a racket
+; Returns: true if the collide x is on the center line of racket 
+; Strategy: cases 
+(define (collide-x? b r)
+  (<= (abs (- (racket-x r) (collide-x b r))) 23.5))
 ; collide-x : Ball Racket -> Bollean
 ; Given: a ball and a racket
 ; Returns: x of the line of ball's start position and end position
 ; when y is equal to the y of the racket
-; Strategy: formula 
+; Strategy: use formula (x2-x1)(y-y1)=(y2-y1)(x-x1)
+; Examples: (collide-x ball-at-19-19-1-5 racket-at-20-20-0-5) -> 91/5
 (define (collide-x b r)
   (let ([x1 (ball-x b)] [y1 (ball-y b)])
-    (+ (* (/ (ball-vx b) (ball-vy b)) (- (racket-y r) y1)) x1)))
+    (+ (* (/ (ball-vx b) (ball-vy b)) (- (+ (racket-y r) (racket-vy r)) y1)) x1)))
+(begin-for-test
+  (check-equal? (collide-x ball-at-19-19-1-5 racket-at-20-20-0-5) 91/5))
 
-; collide-x? : Ball Racket -> Bollean
-; Given: a ball and a racket
-; Returns: true if the collide x is on the center line of strategy 
-; Strategy: cases 
-(define (collide-x? b r)
-  (< (abs (- (racket-x r) (collide-x b r))) 23.5))
+
 
 ;;; world-after-key-event : World KeyEvent -> World
 ;;; GIVEN: a world and a key event
@@ -1021,3 +1044,5 @@
 (begin-for-test
   (check-equal? (distance-between-dots 1 2 1 2) 0)
   (check-= (distance-between-dots 1 2 3 4) 2.8284 0.0001))
+
+(simulation 1/24)

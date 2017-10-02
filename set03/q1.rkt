@@ -6,6 +6,21 @@
 (require 2htdp/image)
 (require "extras.rkt")
 (provide
+  simulation 
+  initial-world
+  world-ready-to-serve?
+  world-after-tick
+  world-after-key-event
+  world-ball
+ world-racket
+ ball-x
+ ball-y
+ racket-x
+ racket-y
+ ball-vx
+ ball-vy
+ racket-vx
+ racket-vy 
  )
 
 (check-location "03" "q1.rkt")
@@ -493,7 +508,6 @@
 ; Strtegy: cases on ball collision
 ; Examples
 ; (ball-after-tick rally-world) -> (make-ball (+ 3 X-POS) (- Y-POS 9) 3 -9)
-
 (define (ball-after-tick w)
   (let ([b (world-ball w)] [r (world-racket w)])
     (if (ball-collide-racket? b r)
@@ -695,7 +709,7 @@
                ))
 
 (define (collide-side-wall-racket-next r)
-     (racket-next (racket-collide-side-wall r)))
+  (racket-next (racket-collide-side-wall r)))
 (define (racket-collide-ball-wall? b r)
   (and (ball-collide-racket? b r) (racket-collide-side-wall? r)))
 
@@ -729,22 +743,24 @@
 (define (collide-y? b r)
   (or (< (ball-y b) (racket-y r) (+ (ball-y b) (ball-vy b)))
       (> (ball-y b) (racket-y r) (+ (ball-y b) (ball-vy b)))))
-
+; collide-x? : Ball Racket -> Bollean
+; Given: a ball and a racket
+; Returns: true if the collide x is on the center line of racket 
+; Strategy: cases 
+(define (collide-x? b r)
+  (<= (abs (- (racket-x r) (collide-x b r))) 23.5))
 ; collide-x : Ball Racket -> Bollean
 ; Given: a ball and a racket
 ; Returns: x of the line of ball's start position and end position
 ; when y is equal to the y of the racket
-; Strategy: formula 
+; Strategy: use formula (x2-x1)(y-y1)=(y2-y1)(x-x1)
+; Examples: (collide-x ball-at-19-19-1-5 racket-at-20-20-0-5) -> 91/5
 (define (collide-x b r)
   (let ([x1 (ball-x b)] [y1 (ball-y b)])
-    (+ (* (/ (ball-vx b) (ball-vy b)) (- (racket-y r) y1)) x1)))
+    (+ (* (/ (ball-vx b) (ball-vy b)) (- (+ (racket-y r) (racket-vy r)) y1)) x1)))
+(begin-for-test
+  (check-equal? (collide-x ball-at-19-19-1-5 racket-at-20-20-0-5) 91/5))
 
-; collide-x? : Ball Racket -> Bollean
-; Given: a ball and a racket
-; Returns: true if the collide x is on the center line of strategy 
-; Strategy: cases 
-(define (collide-x? b r)
-  (< (abs (- (racket-x r) (collide-x b r))) 23.5))
 
 ;;; world-after-key-event : World KeyEvent -> World
 ;;; GIVEN: a world and a key event
@@ -829,4 +845,4 @@
 (define pause-key-event " ")
 (define non-pause-key-event "q")  
 
-(simulation 1/23)
+(simulation 1/13)
