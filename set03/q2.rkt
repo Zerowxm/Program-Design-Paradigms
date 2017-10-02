@@ -86,11 +86,8 @@
 (define RACKET-HEIGHT 7)
 (define RACKET-COLOR "green")
 
-
 (define RACKET-IMAGE (rectangle RACKET-WIDTH RACKET-HEIGHT
                                 "solid" RACKET-COLOR))
-
-
 ; mouse blue circle
 (define MOUSE-CIRCLE-RADIUS 4)
 (define MOUSE-CIRCLE-COLOR "blue")
@@ -122,8 +119,6 @@
 
 ; Constructor template
 ; (make-world Ball Racket WolrdState PosReal PosReal)
-
-
 
 ;;; world-ball : World -> Ball
 ;;; GIVEN: a world
@@ -166,7 +161,6 @@
 (define-struct ball (x y vx vy))
 ; Constructor template
 ; (make-ball Integer Integer Integer Integer)
-
 
 ;;; ball-x : Ball -> Integer
 ;;; ball-y : Ball -> Integer
@@ -263,8 +257,7 @@
    (make-racket X-POS Y-POS 0 0 false '(0 0 0 0))
    READY-TO-SERVE
    speed
-   0
-   ))
+   0))
 (define SPEED 1/3)
 (define world-initial (initial-world SPEED))
 
@@ -287,8 +280,7 @@
         (list (make-posn (ball-x b) (ball-y b))
               (make-posn (racket-x r) (racket-y r)))
         COURT-IMAGE-PAUSE)
-       (rally-world-to-scene w)
-       )))
+       (rally-world-to-scene w))))
 
 (define (mouse-posn r)
   (let* ([mouse-pos (racket-pos-mouse r)] 
@@ -309,8 +301,7 @@
   (make-world ball-at-20-20-1-1 racket-selected
               RALLY
               SPEED
-              0
-              ))
+              0))
 
 (define mouse-click-image (place-images
                            (list MOUSE-CIRCLE
@@ -319,8 +310,7 @@
                            (list (make-posn X-POS Y-POS)
                                  (make-posn 20 20)
                                  (make-posn X-POS Y-POS)) 
-                           COURT-IMAGE
-                           ))
+                           COURT-IMAGE))
 
 (define (rally-world-to-scene w)
   (let ([b (world-ball w)] [r (world-racket w)])
@@ -332,23 +322,20 @@
          (list (mouse-posn r)
                (make-posn (ball-x b) (ball-y b))
                (make-posn (racket-x r) (racket-y r)))
-         COURT-IMAGE
-         )
+         COURT-IMAGE)
         (place-images
          (list BALL-IMAGE
                RACKET-IMAGE)
          (list (make-posn (ball-x b) (ball-y b))
                (make-posn (racket-x r) (racket-y r)))
-         COURT-IMAGE
-         ))))
+         COURT-IMAGE))))
  
 (define image-serve (place-images
                      (list BALL-IMAGE
                            RACKET-IMAGE)
                      (list (make-posn X-POS Y-POS)
                            (make-posn X-POS Y-POS))
-                     COURT-IMAGE
-                     ))
+                     COURT-IMAGE))
 
 (define image-pause (place-images
                      (list BALL-IMAGE
@@ -361,8 +348,7 @@
                      (make-racket X-POS Y-POS 0 0  false '(0 0 0 0))
                      PAUSE
                      SPEED
-                     0
-                     ))
+                     0))
 (begin-for-test
   (check-equal? (world-to-scene world-initial)
                 image-serve "(world-to-scene world-initial) returns wrong image")
@@ -390,8 +376,7 @@
    (world-racket w)
    RALLY
    (world-speed w)
-   0
-   ))
+   0))
 ; Tests:
 (define rally-world 
   (make-world 
@@ -399,16 +384,14 @@
    (make-racket X-POS Y-POS 0 0 false '(0 0 0 0))
    RALLY
    SPEED
-   0
-   ))
+   0))
 (define rally-world-right-event 
   (make-world 
    (make-ball X-POS Y-POS 3 -9)
    (make-racket X-POS Y-POS 1 0 false '(0 0 0 0))
    RALLY
    SPEED
-   0
-   ))
+   0))
 (begin-for-test
   (check-equal? (world-to-rally world-initial)  
                 rally-world "the wolrd changes wrong state"))
@@ -423,7 +406,6 @@
 (begin-for-test
   (check-equal? (world-ready-to-serve? world-initial) true
                 "return wrong infor the world should be ready"))
-
 
 ;;; world-after-tick : World -> World
 ;;; GIVEN: any world that's possible for the simulation
@@ -706,7 +688,8 @@
                 racket-at-10-10-1-1 "racket whould not change")
   (check-equal? (racket-collide-ball 
                  (make-racket 1 1 -1 -1 false '(0 0 0 0)))
-                (make-racket 1 1 -1 0 false '(0 0 0 0)) "racket should change vy to 0"))
+                (make-racket 1 1 -1 0 false '(0 0 0 0))
+                "racket should change vy to 0"))
 
 ; racket-collide-side-wall? Racket -> Boolean
 ; Given: a racket
@@ -979,8 +962,10 @@
 ;;; RETURNS: the racket as it should be after the given mouse event
 ;;; Strategy cases on mouse event       
 ;;; Examles
-;;; (racket-after-mouse-event racket-unselected X-POS Y-POS "button-down") -> racket-selected
-;;; (racket-after-mouse-event racket-selected X-POS Y-POS "drag") -> racket-selected    
+;;; (racket-after-mouse-event racket-unselected X-POS Y-POS "button-down")
+;;; -> racket-selected
+;;; (racket-after-mouse-event racket-selected X-POS Y-POS "drag")
+;;; -> racket-selected    
 (define (racket-after-mouse-event r x y ev)
   (cond
     [(mouse=? ev "button-down") (racket-after-button-down r x y)]
