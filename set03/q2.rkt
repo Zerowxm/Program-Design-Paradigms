@@ -6,12 +6,12 @@
 (require 2htdp/image)
 (require "extras.rkt")
 (provide
-  simulation 
-  initial-world
-  world-ready-to-serve?
-  world-after-tick
-  world-after-key-event
-  world-ball
+ simulation 
+ initial-world
+ world-ready-to-serve?
+ world-after-tick
+ world-after-key-event
+ world-ball
  world-racket
  ball-x
  ball-y
@@ -23,8 +23,7 @@
  racket-vy 
  world-after-mouse-event
  racket-after-mouse-event
- racket-selected?
- )
+ racket-selected?)
 
 (check-location "03" "q2.rkt")
 ; The simulation is a universe program 
@@ -160,13 +159,13 @@
 ; Interpretation:
 ; x, y   : Integer  the position of the center of the ball
 ;          in the scene 
-; vx, vy : Real  two components vx and vy of the ball 
+; vx, vy : Integer  two components vx and vy of the ball 
 ;          telling how many pixels it moves on each tick 
 ;          in the x and y directions, respectively.
 
 (define-struct ball (x y vx vy))
 ; Constructor template
-; (make-ball Integer Integer Real Real)
+; (make-ball Integer Integer Integer Integer)
 
 
 ;;; ball-x : Ball -> Integer
@@ -195,10 +194,10 @@
 ; Interpretation:
 ; x, y   : Integer  the position of the center of the racket
 ;          in the scene 
-; vx, vy : Real  two components vx and vy of the racket 
+; vx, vy : Integer  two components vx and vy of the racket 
 ;          telling how many pixels it moves on each tick                                             
 ;          in the x and y directions, respectively.
-; selected? : Bollean describes whether or not the racket is selected.
+; selected? : Boolean describes whether or not the racket is selected.
 ; pos-mouse : List 4-elements list indicating the mouse position
 ; and the difference between positions of racket and mouse
 ; first two elements are position of mouse and last two ones are difference 
@@ -208,7 +207,7 @@
 
 (define-struct racket (x y vx vy selected? pos-mouse))
 ; Constructor template
-; (make-racket Integer Integer Real Real Bollean List)
+; (make-racket Integer Integer Integer Integer Boolean List)
 
 ;;; racket-x : Racket -> Integer
 ;;; racket-y : Racket -> Integer
@@ -308,20 +307,20 @@
 
 (define mouse-click-world
   (make-world ball-at-20-20-1-1 racket-selected
-    RALLY
-    SPEED
-    0
-    ))
+              RALLY
+              SPEED
+              0
+              ))
 
 (define mouse-click-image (place-images
-         (list MOUSE-CIRCLE
-               BALL-IMAGE
-               RACKET-IMAGE)
-         (list (make-posn X-POS Y-POS)
-               (make-posn 20 20)
-               (make-posn X-POS Y-POS)) 
-         COURT-IMAGE
-         ))
+                           (list MOUSE-CIRCLE
+                                 BALL-IMAGE
+                                 RACKET-IMAGE)
+                           (list (make-posn X-POS Y-POS)
+                                 (make-posn 20 20)
+                                 (make-posn X-POS Y-POS)) 
+                           COURT-IMAGE
+                           ))
 
 (define (rally-world-to-scene w)
   (let ([b (world-ball w)] [r (world-racket w)])
@@ -370,7 +369,7 @@
   (check-equal? (world-to-scene pause-world) image-pause 
                 "(world-to-scene pause-world) returns wrong image")
   (check-equal? (rally-world-to-scene mouse-click-world) mouse-click-image 
-    "(rally-world-to-scene mouse-click-world) returns wrong image"))
+                "(rally-world-to-scene mouse-click-world) returns wrong image"))
  
 ; world-to-rally : World -> World
 ; GIVEN: A world in ready-to-serve state
@@ -418,6 +417,7 @@
 ;;; GIVEN: a world
 ;;; RETURNS: true iff the world is in its ready-to-serve state
 ;;; Stategy: cases on world state
+;;; Examples: (world-ready-to-serve? world-initial) => true
 (define (world-ready-to-serve? w)
   (equal? READY-TO-SERVE (world-state w)))
 (begin-for-test
@@ -431,7 +431,8 @@
 ;;;     after a tick
 ;;; Strategy: cases on world state if world is no longer in rally, treat it as
 ;;; press space
-
+;;; Examples: (world-after-tick world-to-end) => world-after-end
+;;; (world-after-tick world-initial) => world-initial
 (define (world-after-tick w)
   (if (rally-end? w)
       (press-space w)
@@ -463,6 +464,8 @@
 ;;; RETURNS: the world that should follow the given world
 ;;;     after a tick 
 ;;; Strategy: cases on the world state
+;;; Examples: (diff-world-state-after-tick pause-world) => pause-world-1-tick
+;;; (diff-world-state-after-tick rally-world) => rally-world-1-tick
 (define (diff-world-state-after-tick w)
   (let ([state (world-state w)])
     (cond
@@ -494,25 +497,27 @@
   (check-equal? (diff-world-state-after-tick rally-world)
                 rally-world-1-tick "the ball should is in wrong position"))
 
-; rally-end? : World -> Bollean
+; rally-end? : World -> Boolean
 ; Given: any world that's possible for the simulation
 ; Returns: true if the ball collides the back wall or the racket
 ; collides the top wall
 ; Strategy: cases on whether the world is no longer in rally
+; Examples:  (rally-end? world-to-end) => true
 (define (rally-end? w)
   (let ([b (world-ball w)] [r (world-racket w)])
     (if (equal? PAUSE (world-state w))
-      false
-      (or (racket-collide-top-wall? r)
-        (ball-collide-back-wall? b)))))
+        false
+        (or (racket-collide-top-wall? r)
+            (ball-collide-back-wall? b)))))
 ; Tests
 (begin-for-test 
   (check-equal? (rally-end? world-to-end) true "the world should end"))
 
-; ball-collide-back-wall?: Ball -> Bollean
+; ball-collide-back-wall?: Ball -> Boolean
 ; Given: a ball of a world
 ; Returns: true if the ball collides the back wall
 ; Strategy: cases
+; E:(ball-collide-back-wall? ball-collide-back-wall) => true
 (define (ball-collide-back-wall? b)
   (let ([y (+ (ball-y b) (ball-vy b))])
     (if(> y 649)
@@ -527,9 +532,10 @@
 ; rally-world-after-tick: World -> World
 ; Given: a world in rally state
 ; Returns: the world that should follow the given world
-;;;     after a tick 
+;     after a tick 
 ; Stategy : use constructor template on World 
 ; and combine simpler functions 
+; E:(rally-world-after-tick rally-world) =>rally-world-1-tick
 (define (rally-world-after-tick w)
   (make-world
    (ball-after-tick w)
@@ -546,6 +552,7 @@
 ; Returns: the world that should follow the given world
 ; after a tick
 ; Stategy: cases on the puase-time if time < 3 the world is still pausing 
+; Examples:(pause-world-after-tick pause-world) => pause-world-1-tick 
 (define (pause-world-after-tick w)
   (let* ([b (world-ball w)] [r (world-racket w)] [speed (world-speed w)])
     (if(< (world-pause-time w) 3)
@@ -589,6 +596,8 @@
 ; Given: A ball 
 ; Returns: the ball after
 ; Strtegy: cases on ball collision
+; Examples
+; (ball-next-motion collide-both-ball) => (make-ball 8 8 10 10)
 (define (ball-next-motion b)
   (let ([type (ball-collide-wall? b)])
     (cond
@@ -623,7 +632,7 @@
              (+ (ball-y b) (ball-vy b)) 
              (ball-vx b) (ball-vy b)))
 
-; ball-collide-wall? Ball -> Bollean
+; ball-collide-wall? Ball -> Boolean
 ; Given: a ball
 ; Returns: 0 if ball does not collide the wall
 ; 1 if ball collides side wall and 2 if collides top wall
@@ -634,7 +643,7 @@
         [x (+ (ball-x b) (ball-vx b))])
     (+ (ball-collide-top-wall? y) (ball-collide-side-wall? x))))
 
-; ball-collide-side-wall? Ball -> Bollean
+; ball-collide-side-wall? Ball -> Boolean
 ; Given: a ball
 ; Returns: 1 if ball collide the side wall 0 if not
 ; Stratagy : cases on the collision
@@ -643,7 +652,7 @@
       1
       0))
 
-; ball-collide-top-wall? Ball -> Bollean
+; ball-collide-top-wall? Ball -> Boolean
 ; Given: a ball
 ; Returns: 2 if ball collide the top wall 0 if not
 ; Stratagy : cases on the collision
@@ -651,7 +660,9 @@
   (if(< y 0)
      2
      0))
-
+(begin-for-test
+  (check-equal? (ball-collide-top-wall? 3) 0 
+                "it should return 0"))
 ; ball-collide-side-wall: Ball -> Ball
 ; Given: a ball colliding the side wall
 ; Returns: a ball afrer colliding the side wall
@@ -672,7 +683,7 @@
          [y (+ (ball-y b) vy)])
     (make-ball (ball-x b) (- y) (ball-vx b) (- vy))))
 
-; ball-collide-racket: Ball Real -> Ball
+; ball-collide-racket: Ball Integer -> Ball
 ; Given: a ball colliding the racket
 ; Returns: a ball afrer colliding the racket
 ; Strategy: use template on Ball
@@ -680,7 +691,7 @@
   (make-ball (ball-x b) (ball-y b) 
              (ball-vx b) (- vy (ball-vy b))))
 
-; racket-collide-ball: Racket Real -> Racket
+; racket-collide-ball: Racket Integer -> Racket
 ; Given: a racket colliding the ball
 ; Returns: a racket afrer colliding the ball
 ; Strategy: cases on vy of the racket and use template on Racket
@@ -697,7 +708,7 @@
                  (make-racket 1 1 -1 -1 false '(0 0 0 0)))
                 (make-racket 1 1 -1 0 false '(0 0 0 0)) "racket should change vy to 0"))
 
-; racket-collide-side-wall? Racket -> Bollean
+; racket-collide-side-wall? Racket -> Boolean
 ; Given: a racket
 ; Returns: true if racket collide the side wall 
 ; Stratagy : cases on the collision
@@ -718,7 +729,6 @@
                    0 (racket-vy r) (racket-selected? r)
                    (racket-pos-mouse r))))
 ; Tests
-
 (begin-for-test 
   (check-equal? (racket-collide-side-wall racket-at-10-10-1-1)
                 (make-racket 23.5 10 0 1 false '(0 0 0 0)) 
@@ -729,17 +739,21 @@
 ; racket-collide-top-wall: Racket -> Racket
 ; Given: a racket colliding the top wall
 ; Returns: a racket afrer colliding the top wall
-; Strategy: cases
-
+; Strategy: cases on racket collision
 (define (racket-collide-top-wall? r)
   (let ([y (+ (racket-y r) (racket-vy r))])
     (< y 0)))
-
+(begin-for-test
+  (check-equal? (racket-collide-top-wall? racket-at-20-20-0-5) false
+                "it should return false"))
 ;racket-after-tick: World -> racket
 ; Given: A world in rally state
 ; Returns: the racket of the world that should follow the given world
 ; after a tick
 ; Strtegy: cases on racket collision
+; Examples:
+;(racket-after-tick world-ball-collide-racket)
+; => (make-racket 23.5 20 0 0 false '(0 0 0 0))
 (define (racket-after-tick w)
   (let ([b (world-ball w)] [r (world-racket w)])
     (cond
@@ -748,7 +762,6 @@
       [(ball-collide-racket? b r) (racket-collide-ball r)]
       [(racket-collide-side-wall? r) (collide-side-wall-racket-next r)]
       [else (racket-next r)])))
-
 ;Test
 (define world-ball-wall
   (make-world
@@ -795,15 +808,20 @@
                 (world-speed w)
                 0)))
 
-; ball-collide-racket? : Ball Racket -> Bollean
+; ball-collide-racket? : Ball Racket -> Boolean
 ; Given: a ball and a racket
 ; Returns: true if the ball and the racket are collided.
 ; Strategy: Cases on collision
+; Examles: (ball-collide-racket? ball-23 racket-23) => true
 (define (ball-collide-racket? b r)
   (and (collide-y? b r) (collide-x? b r)))  
-
+(define racket-23 (make-racket 23.5 300 0 0 false (list 0 0 0 0)))
+(define ball-23 (make-ball 23 299 3 9))
+(begin-for-test
+  (check-equal? (ball-collide-racket? ball-23 racket-23) true 
+                "it should be true"))
 ; helper functions on collision
-; collide-y? : Ball Racket -> Bollean
+; collide-y? : Ball Racket -> Boolean
 ; Given: a ball and a racket
 ; Returns: true l
 ; Strategy: formula the pos-y of racket is between 
@@ -811,13 +829,16 @@
 (define (collide-y? b r)
   (or (< (ball-y b) (racket-y r) (+ (ball-y b) (ball-vy b)))
       (> (ball-y b) (racket-y r) (+ (ball-y b) (ball-vy b)))))
-; collide-x? : Ball Racket -> Bollean
+; collide-x? : Ball Racket -> Boolean
 ; Given: a ball and a racket
 ; Returns: true if the collide x is on the center line of racket 
 ; Strategy: cases 
 (define (collide-x? b r)
   (<= (abs (- (racket-x r) (collide-x b r))) 23.5))
-; collide-x : Ball Racket -> Bollean
+(begin-for-test
+  (check-equal? (collide-x? ball-at-20-20-1-1 racket-at-10-10-1-1) true
+                "it should return true"))
+; collide-x : Ball Racket -> Boolean
 ; Given: a ball and a racket
 ; Returns: x of the line of ball's start position and end position
 ; when y is equal to the y of the racket
@@ -829,19 +850,21 @@
 (begin-for-test
   (check-equal? (collide-x ball-at-19-19-1-5 racket-at-20-20-0-5) 91/5))
 
-
-
 ;;; world-after-key-event : World KeyEvent -> World
 ;;; GIVEN: a world and a key event
 ;;; RETURNS: the world that should follow the given world
 ;;;     after the given key event
 ;;; Strategy: cases on the world state
+;;; Examples
+;;; (world-after-key-event world-initial non-pause-key-event) -> world-initial
+;;; (world-after-key-event world-initial pause-key-event) -> rally-world
+;;; (world-after-key-event rally-world pause-key-event) -> pause-world
 (define (world-after-key-event w ev)
   (let ([state (world-state w)])
     (cond
       [(equal? RALLY state) (rally-world-after-key-event w ev)]
       [(and (equal? READY-TO-SERVE state) (is-pause-key-event? ev))
-      (world-to-rally w)]
+       (world-to-rally w)]
       [else w])))
 ; Test
 (begin-for-test 
@@ -868,6 +891,9 @@
 ;;; RETURNS: the world that should follow the given world
 ;;;     after the given key event
 ;;; Strategy: cases on the arrow key and use template on World
+;;; Examles
+;;; (arrow-key-event rally-world "a") ->rally-world
+;;; (arrow-key-event rally-world "right") -> rally-world-right-event
 (define (arrow-key-event w ev)
   (let* ([v (arrow-key-event? ev)]
          [vx (list-ref v 0)] [vy (list-ref v 1)] [r (world-racket w)])
@@ -893,6 +919,8 @@
 ;;; vx and vy that should be added to the racket
 ;;; after the given key event
 ;;; Strategy: cases on the arrow key
+;;; Exmples (arrow-key-event? "up") -> (0 -1)
+;;; (arrow-key-event? "left") -> '(-1 0)
 (define (arrow-key-event? ev)
   (cond
     [(key=? ev "up") '(0 -1)]
@@ -927,7 +955,8 @@
 ;;;     and the mouse event
 ;;; RETURNS: the world that should follow the given world after
 ;;;     the given mouse event
-
+;;; Strategy: cases on world state
+;;; Examles:(world-after-mouse-event pause-world 1 2 "button-down") -> pause-world
 (define (world-after-mouse-event w x y ev)
   (if (string=? RALLY (world-state w))
       (make-world (world-ball w)
@@ -938,17 +967,20 @@
 ; Test
 (begin-for-test 
   (check-equal? (world-after-mouse-event pause-world 1 2 "button-down") 
-    pause-world
-    "it should be the same world")
+                pause-world
+                "it should be the same world")
   (check-equal? (world-after-mouse-event rally-world 1 2 "button-down") 
-    rally-world
-    "it should be the same world"))      
+                rally-world
+                "it should be the same world"))      
 ;;; racket-after-mouse-event
 ;;;     : Racket Int Int MouseEvent -> Racket
 ;;; GIVEN: a racket, the x and y coordinates of a mouse event,
 ;;;     and the mouse event
 ;;; RETURNS: the racket as it should be after the given mouse event
-          
+;;; Strategy cases on mouse event       
+;;; Examles
+;;; (racket-after-mouse-event racket-unselected X-POS Y-POS "button-down") -> racket-selected
+;;; (racket-after-mouse-event racket-selected X-POS Y-POS "drag") -> racket-selected    
 (define (racket-after-mouse-event r x y ev)
   (cond
     [(mouse=? ev "button-down") (racket-after-button-down r x y)]
@@ -956,22 +988,21 @@
     [(mouse=? ev "button-up") (racket-after-button-up r x y)]
     [else r]))
 ; Test
-
 (begin-for-test 
   (check-equal? (racket-after-mouse-event racket-unselected X-POS Y-POS "button-down")
-    racket-selected "the racket should be selected")
+                racket-selected "the racket should be selected")
   (check-equal? (racket-after-mouse-event racket-unselected X-POS Y-POS "enter")
-    racket-unselected "the racket should not be changed")
+                racket-unselected "the racket should not be changed")
   (check-equal? (racket-after-mouse-event racket-selected X-POS Y-POS "drag")
-    racket-selected "the racket should be dragged")
+                racket-selected "the racket should be dragged")
   (check-equal? (racket-after-mouse-event racket-selected X-POS Y-POS "button-up")
-    racket-unselected "the racket should be unselected")
+                racket-unselected "the racket should be unselected")
   (check-equal? (racket-after-mouse-event racket-unselected X-POS Y-POS "drag")
-    racket-unselected "the racket should be dragged")
+                racket-unselected "the racket should be dragged")
   (check-equal? (racket-after-mouse-event racket-unselected X-POS Y-POS "button-up")
-    racket-unselected "the racket should be unselected"))
+                racket-unselected "the racket should be unselected"))
 
-; in-racket? : Racket PosReal PosReal -> Bollean
+; in-racket? : Racket PosReal PosReal -> Boolean
 ; Given: a racket and a positon 
 ; Returns: true if the posion is in the circle of the racket center with 25 radius 
 ; Exmples: (in-racket? racket-unselected 1 1) -> false
@@ -979,7 +1010,11 @@
 (define (in-racket? r x1 y1)
   (let ([x2 (racket-x r)] [y2 (racket-y r)])
     (< (distance-between-dots x1 y1 x2 y2) 25)))
-
+(begin-for-test
+  (check-equal? (in-racket? racket-at-20-20-0-5 1 1) false
+                "it should return false")
+  (check-equal? (in-racket? racket-unselected 1 1)false
+                "it should return false"))
 ; difference-of-dots: Real Real Real Real
 ; Given positions of two points
 ; Returns: a list of the first two arguments and the difference of x1,x2 and y1,y2
@@ -987,7 +1022,11 @@
 ; (difference-of-dots 30 100 40 10) -> '(30 100 10 -90)
 (define (difference-of-dots x1 y1 x2 y2) 
   (list x1 y1 (- x2 x1) (- y2 y1)))
-
+(begin-for-test
+  (check-equal? (difference-of-dots 30 100 40 10) '(30 100 10 -90)
+                "it should return '(30 100 10 -90)")
+  (check-equal? (difference-of-dots 100 120 100 120) '(100 120 0 0)
+                "it should return '(100 120 0 0)"))
 ; new-pos-racket: Racket Real Real Boolean -> Racket
 ; Given: a racket and positions of mouse and whether racket is selected
 ; Returns: a new racket according to the position
@@ -996,12 +1035,12 @@
   (let* ([pos-mouse (racket-pos-mouse r)] 
          [t1 (list-ref pos-mouse 2)] [t2 (list-ref pos-mouse 3)])
     (if (equal? true selected?)
-      (make-racket (+ t1 x1) (+ t2 y1)
-                 (racket-vx r) (racket-vy r) true
-                 (list x1 y1 t1 t2))
-      (make-racket (+ t1 x1) (+ t2 y1)
-                 (racket-vx r) (racket-vy r) false
-                 (list 0 0 0 0)))))
+        (make-racket (+ t1 x1) (+ t2 y1)
+                     (racket-vx r) (racket-vy r) true
+                     (list x1 y1 t1 t2))
+        (make-racket (+ t1 x1) (+ t2 y1)
+                     (racket-vx r) (racket-vy r) false
+                     (list 0 0 0 0)))))
 
 ; racket-after-button-down: Racket Real Real -> Racket
 ; Given:  a racket and positions of mouse
@@ -1044,5 +1083,3 @@
 (begin-for-test
   (check-equal? (distance-between-dots 1 2 1 2) 0)
   (check-= (distance-between-dots 1 2 3 4) 2.8284 0.0001))
-
-(simulation 1/24)
