@@ -348,7 +348,7 @@
                      (make-racket X-POS Y-POS 0 0  false '(0 0 0 0))
                      PAUSE
                      SPEED
-                     0))
+                     SPEED))
 (begin-for-test
   (check-equal? (world-to-scene world-initial)
                 image-serve "(world-to-scene world-initial) returns wrong image")
@@ -435,7 +435,7 @@
                                  RALLY SPEED 0))
 
 (define world-after-end (make-world ball-after-end racket-at-10-10-0-0
-                                    PAUSE SPEED 0))
+                                    PAUSE SPEED SPEED))
 (begin-for-test 
   (check-equal? (world-after-tick world-to-end)
                 world-after-end "the world should be pause")
@@ -460,7 +460,7 @@
                             (make-racket X-POS Y-POS 0 0 false '(0 0 0 0))
                             PAUSE
                             SPEED
-                            SPEED))
+                            (* 2 SPEED)))
 (define pause-world-to-serve (make-world 
                               (make-ball X-POS Y-POS 0 0)
                               (make-racket X-POS Y-POS 0 0 false '(0 0 0 0))
@@ -572,7 +572,7 @@
                 (make-ball (+ 3 X-POS) (- Y-POS 9) 3 -9)
                 "the ball is wrong")
   (check-equal? (ball-after-tick world-ball-collide-racket)
-                (make-ball 19 19 1 -10) "the ball should collide the racket"))
+                (make-ball 20 24 1 -10) "the ball should collide the racket"))
 
 ; ball-next-motion: Ball -> Ball
 ; Given: A ball 
@@ -594,17 +594,17 @@
 (define collide-top-ball (make-ball 10 2 2 -10))
 (begin-for-test
   (check-equal? (ball-next-motion collide-both-ball) 
-                (make-ball 8 8 10 10)
-                "the ball should at (8,8) with v (10,10)")
+                (make-ball 18 18 10 10)
+                "the ball should at (18,18) with v (10,10)")
   (check-equal? (ball-next-motion collide-side-ball1) 
-                (make-ball 8 10 10 2)
-                "the ball should at (8,10) with v (10,2)")
+                (make-ball 8 12 10 2)
+                "the ball should at (8,12) with v (10,2)")
   (check-equal? (ball-next-motion collide-side-ball2) 
-                (make-ball 416 10 -10 2)
-                "the ball should at (8,10) with v (-10,2)")
+                (make-ball 416 12 -10 2)
+                "the ball should at (416,12) with v (-10,2)")
   (check-equal? (ball-next-motion collide-top-ball) 
-                (make-ball 10 8 2 10))
-  "the ball should at (10,8) with v (2,10)")
+                (make-ball 12 8 2 10))
+  "the ball should at (12,8) with v (2,10)")
 ; ball-no-collide Ball -> Ball
 ; Given: a ball which does not collide any thing
 ; Returns: the ball in next movement by changing the pos of the ball.
@@ -614,7 +614,7 @@
              (+ (ball-y b) (ball-vy b)) 
              (ball-vx b) (ball-vy b)))
 
-; ball-collide-wall? Ball -> Boolean
+; ball-collide-wall? Ball -> Integer
 ; Given: a ball
 ; Returns: 0 if ball does not collide the wall
 ; 1 if ball collides side wall and 2 if collides top wall
@@ -625,8 +625,8 @@
         [x (+ (ball-x b) (ball-vx b))])
     (+ (ball-collide-top-wall? y) (ball-collide-side-wall? x))))
 
-; ball-collide-side-wall? Ball -> Boolean
-; Given: a ball
+; ball-collide-side-wall?: Integer -> Integer
+; Given: the tentive x of the ball
 ; Returns: 1 if ball collide the side wall 0 if not
 ; Stratagy : cases on the collision
 (define (ball-collide-side-wall? x)
@@ -634,14 +634,15 @@
       1
       0))
 
-; ball-collide-top-wall? Ball -> Boolean
-; Given: a ball
+; ball-collide-top-wall?: Integer -> Integer
+; Given: the tentive y of the ball
 ; Returns: 2 if ball collide the top wall 0 if not
 ; Stratagy : cases on the collision
 (define (ball-collide-top-wall? y)
   (if(< y 0)
      2
      0))
+
 (begin-for-test
   (check-equal? (ball-collide-top-wall? 3) 0 
                 "it should return 0"))
@@ -649,37 +650,38 @@
 ; Given: a ball colliding the side wall
 ; Returns: a ball afrer colliding the side wall
 ; Strategy: cases on right side or left side wall
-(define (ball-collide-side-wall b)
-  (let* ([vx (ball-vx b)]
-         [x (+ (ball-x b) vx)])
-    (if (< x 0)
-        (make-ball (- x) (ball-y b) (- vx) (ball-vy b))
-        (make-ball (- 850 x) (ball-y b) (- vx) (ball-vy b)))))
+ (define (ball-collide-side-wall b)
+    (let* ([vx (ball-vx b)]
+           [x (+ (ball-x b) vx)])
+      (if (< x 0)
+          (make-ball (- x) (+ (ball-vy b) (ball-y b)) (- vx) (ball-vy b))
+          (make-ball (- 850 x) (+ (ball-vy b) (ball-y b)) (- vx) (ball-vy b)))))
 
-; ball-collide-top-wall: Ball -> Ball
-; Given: a ball colliding the top wall
-; Returns: a ball afrer colliding the top wall
-; Strategy: use template on Ball
-(define (ball-collide-top-wall b)
-  (let* ([vy (ball-vy b)]
-         [y (+ (ball-y b) vy)])
-    (make-ball (ball-x b) (- y) (ball-vx b) (- vy))))
+  ; ball-collide-top-wall: Ball -> Ball
+  ; Given: a ball colliding the top wall
+  ; Returns: a ball afrer colliding the top wall
+  ; Strategy: use template on Ball
+  (define (ball-collide-top-wall b)
+    (let* ([vy (ball-vy b)]
+           [y (+ (ball-y b) vy)])
+      (make-ball (+ (ball-vx b) (ball-x b)) (- y) (ball-vx b) (- vy))))
 
 ; ball-collide-racket: Ball Integer -> Ball
-; Given: a ball colliding the racket
-; Returns: a ball afrer colliding the racket
+; Given: a ball colliding the racket and the vy of racket
+ ; Returns: a ball afrer colliding the racket
 ; Strategy: use template on Ball
-(define (ball-collide-racket b vy)
-  (make-ball (ball-x b) (ball-y b) 
-             (ball-vx b) (- vy (ball-vy b))))
-
-; racket-collide-ball: Racket Integer -> Racket
+  (define (ball-collide-racket b vy)
+    (make-ball (+ (ball-x b) (ball-vx b))
+     (+ (ball-vy b) (ball-y b)) 
+               (ball-vx b) (- vy (ball-vy b)))
+    )
+; racket-collide-ball: Racket -> Racket
 ; Given: a racket colliding the ball
 ; Returns: a racket afrer colliding the ball
 ; Strategy: cases on vy of the racket and use template on Racket
 (define (racket-collide-ball r)
   (if (< (racket-vy r) 0)
-      (make-racket (racket-x r) (racket-y r) 
+      (make-racket (racket-x r) (+ (racket-y r) (racket-vy r)) 
                    (racket-vx r) 0 (racket-selected? r) (racket-pos-mouse r))
       r))
 ; Test
@@ -688,7 +690,7 @@
                 racket-at-10-10-1-1 "racket whould not change")
   (check-equal? (racket-collide-ball 
                  (make-racket 1 1 -1 -1 false '(0 0 0 0)))
-                (make-racket 1 1 -1 0 false '(0 0 0 0))
+                (make-racket 1 0 -1 0 false '(0 0 0 0))
                 "racket should change vy to 0"))
 
 ; racket-collide-side-wall? Racket -> Boolean
@@ -697,8 +699,8 @@
 ; Stratagy : cases on the collision
 (define (racket-collide-side-wall? r)
   (let ([x (+ (racket-x r) (racket-vx r))])
-    (or (> x 401.5) 
-        (< x 23.5))))
+    (or (> x 402) 
+        (< x 24))))
 
 ; racket-collide-side-wall: Racket -> Racket
 ; Given: a racket colliding the side wall
@@ -706,19 +708,19 @@
 ; Strategy: cases on colliding the right side or left side wall
 (define (racket-collide-side-wall r)
   (if (< (racket-x r) 212.5)
-      (make-racket 23.5 (racket-y r) 0 (racket-vy r)
+      (make-racket 24 (racket-y r) 0 (racket-vy r)
                    (racket-selected? r) (racket-pos-mouse r))
-      (make-racket 401.5 (racket-y r) 
+      (make-racket 402 (racket-y r) 
                    0 (racket-vy r) (racket-selected? r)
                    (racket-pos-mouse r))))
 ; Tests
 (begin-for-test 
   (check-equal? (racket-collide-side-wall racket-at-10-10-1-1)
-                (make-racket 23.5 10 0 1 false '(0 0 0 0)) 
-                "it should be (make-racket 23.5 10 0 1 false '(0 0 0 0))")
+                (make-racket 24 10 0 1 false '(0 0 0 0)) 
+                "it should be (make-racket 24 10 0 1 false '(0 0 0 0))")
   (check-equal? (racket-collide-side-wall (make-racket 233.5 10 1 1  false '(0 0 0 0)))
-                (make-racket 401.5 10 0 1 false '(0 0 0 0)) 
-                "it should be (make-racket 401.5 10 0 1 false '(0 0 0 0))"))
+                (make-racket 402 10 0 1 false '(0 0 0 0)) 
+                "it should be (make-racket 402 10 0 1 false '(0 0 0 0))"))
 ; racket-collide-top-wall: Racket -> Racket
 ; Given: a racket colliding the top wall
 ; Returns: a racket afrer colliding the top wall
@@ -756,14 +758,14 @@
    SPEED 0))
 (begin-for-test
   (check-equal? (racket-after-tick world-ball-collide-racket)
-                (make-racket 23.5 20 0 0 false '(0 0 0 0))
-                "it should return (racket 23.5 20 0 0 false '(0 0 0 0))")
+                (make-racket 24 15 0 0 false '(0 0 0 0))
+                "it should return (racket 24 15 0 0 false '(0 0 0 0))")
   (check-equal? (racket-after-tick world-ball-wall)
-                (make-racket 240 20 0 0 false '(0 0 0 0))
-                "it should return (racket 240 20 0 0 false '(0 0 0 0))")
+                (make-racket 240 18 0 0 false '(0 0 0 0))
+                "it should return (racket 240 18 0 0 false '(0 0 0 0))")
   (check-equal? (racket-after-tick world-racket-wall)
-                (make-racket 401.5 18 0 -2 false '(0 0 0 0))
-                "it should return (racket 401.5 18 0 -2 false '(0 0 0 0))"))
+                (make-racket 402 18 0 -2 false '(0 0 0 0))
+                "it should return (racket 402 18 0 -2 false '(0 0 0 0))"))
 
 (define (collide-side-wall-racket-next r)
   (racket-next (racket-collide-side-wall r)))
@@ -789,7 +791,7 @@
                              0 0 false (racket-pos-mouse r))
                 PAUSE
                 (world-speed w)
-                0)))
+                (world-speed w))))
 
 ; ball-collide-racket? : Ball Racket -> Boolean
 ; Given: a ball and a racket
@@ -797,7 +799,10 @@
 ; Strategy: Cases on collision
 ; Examles: (ball-collide-racket? ball-23 racket-23) => true
 (define (ball-collide-racket? b r)
-  (and (collide-y? b r) (collide-x? b r)))  
+    (if (or (ball-y-equal-racket-y? b r) (collide-y? b r))
+     (collide-x? b r)
+     false))  
+
 (define racket-23 (make-racket 23.5 300 0 0 false (list 0 0 0 0)))
 (define ball-23 (make-ball 23 299 3 9))
 (begin-for-test
@@ -812,6 +817,12 @@
 (define (collide-y? b r)
   (or (< (ball-y b) (racket-y r) (+ (ball-y b) (ball-vy b)))
       (> (ball-y b) (racket-y r) (+ (ball-y b) (ball-vy b)))))
+
+
+  (define (ball-y-equal-racket-y? b r)
+     (let ([y (+ (racket-vy r) (racket-y r))])
+    
+         (= y (+ (ball-y b) (ball-vy b)))))
 ; collide-x? : Ball Racket -> Boolean
 ; Given: a ball and a racket
 ; Returns: true if the collide x is on the center line of racket 
