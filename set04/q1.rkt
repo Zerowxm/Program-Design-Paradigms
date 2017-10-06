@@ -44,40 +44,83 @@
 ;;;     (permutation-of? (list 3 1 2) (list 1 2 4)) => false
 ;;;     (permutation-of? (list 1 2 3) (list 1 2)) => false
 ;;;     (permutation-of? (list) (list)) => true
+(define (permutation-of? l1 l2)
+  (let ([count (max-count l2)])
+    (permutation-comparator l1 l2 count)))
+(begin-for-test
+	(check-equal?  (permutation-of? (list 1 2 3) (list 1 2 3)) true
+	 "it should be the permutation")
+	(check-equal?  (permutation-of?  (list 3 1 2) (list 1 2 3)) true
+	 "it should be the permutation")
+	(check-equal?  (permutation-of?  (list 3 1 2) (list 1 2 4)) false
+	 "it should be not the permutation")
+	(check-equal?  (permutation-of? (list 1 2 3) (list 1 2)) false
+	 "it should not be the permutation")
+	(check-equal?  (permutation-of? (list) (list)) true
+	 "it should be the permutation"))
+
+; max-count: IntList -> Int
+; Given: a list of integers
+; Returns: (n(n-1)/2) in which n is the length of the given list
+; Examples:  (max-count (list 1 2 3)) => 3 
+; Strategy: translation of formula
 (define (max-count l)
   (let ([count (length l)])
     (* count (- count 1) 1/2)))
+(begin-for-test
+	(check-equal? (max-count (list 1 2 3)) 3 "it should return 3") 
+	(check-equal? (max-count (list)) 0 "it should return 0"))
+
+; max-count: Integer IntList -> Int
+; Given: a number and a list of integers
+; Returns:  a number which is the result of the given number minus the length of list
+; and plus 2
+; Examples:  (new-count 3 (list 1 2 3)) => 2 
+; Strategy: translation of formula
 (define (new-count count l)
   (- count (- (length l) 2)))
+(begin-for-test
+	(check-equal? (new-count 3 (list 1 2 3)) 2 "it should return 2"))
 
-(define (permutation-of? l1 l2)
-  (let ([count (max-count l2)])
-    (permutation-count l1 l2 count)))
-
-(define (permutation-count l1 l2 count)
+;;; permutation-comparator : IntList IntList Integer -> Boolean
+;;; GIVEN: two lists of integers and the max-count of the second list
+;;; WHERE: neither list contains duplicate elements
+;;; RETURNS: true if and only if one of the lists
+;;;     is a permutation of the other
+;;; EXAMPLES:
+;;;     (permutation-comparator (list 1 2 3) (list 1 2 3)) => true
+;;;     (permutation-comparator (list 3 1 2) (list 1 2 3)) => true
+;;;     (permutation-comparator (list 3 1 2) (list 1 2 4)) => false
+;;;     (permutation-comparator (list 1 2 3) (list 1 2)) => false
+;;;     (permutation-comparator (list) (list)) => true
+(define (permutation-comparator l1 l2 count)
   (cond
     [(and (empty? l1) (empty? l2)) true]
-    [(or (empty? l1) (empty? l2)) false]
-    [(< count 0) false]
+    [(or (empty? l1) (empty? l2) (< count 0)) false]
     [(= (first l1) (first l2))
-     (permutation-count (rest l1) (rest l2) (new-count count l2))]
+     (permutation-comparator (rest l1) (rest l2) (new-count count l2))]
     [else
-     (permutation-count l1 (change-1st-to-end l2) (- count 1))]))
+     (permutation-comparator l1 (change-1st-to-end l2) (- count 1))]))
+(begin-for-test
+  (check-equal? (permutation-comparator (list 3 1 2) (list 1 2 3) 3) true
+                "it should return true")
+  (check-equal? (permutation-comparator (list 3 1 2) (list 1 2 4) 3) false
+                "it should return false")
+  (check-equal? (permutation-comparator (list 1 2 3) (list 1 2) 1) false
+                "it should return false")
+  (check-equal? (permutation-comparator (list) (list) 0) true
+                "it should return true"))
 
+; change-1st-to-end: IntList -> IntList
+; Given: a list of integers where the list at least contains two integers.
+; Returns: a list which is the same as the given list 
+; except that the first item is changed to the end of the list
+; Examples: (change-1st-to-end (list 1 2 3)) -> (list 2 3 1)
 (define (change-1st-to-end l)
   (append (rest l) (list (first l))))
-
 (begin-for-test
-  (check-equal? (permutation-of? (list 1 2 3) (list 1 2 3)) true
-                "it should return true")
-  (check-equal? (permutation-of? (list 3 1 2) (list 1 2 3)) true
-                "it should return true")
-  (check-equal? (permutation-of? (list 3 1 2) (list 1 2 4)) false
-                "it should return false")
-  (check-equal? (permutation-of? (list 1 2 3) (list 1 2)) false
-                "it should return false")
-  (check-equal? (permutation-of? (list) (list)) true
-                "it should return true"))
+	(check-equal? (change-1st-to-end (list 1 2 3)) (list 2 3 1)
+		"it should be (list 2 3 1)"))
 
 ;;; shortlex-less-than? : IntList IntList -> Boolean
 ;;; GIVEN: two lists of integers
@@ -98,8 +141,6 @@
 ;;;     (shortlex-less-than? (list 3 0) (list 1 2)) => false
 ;;;     (shortlex-less-than? (list 0 3) (list 1 2)) => true
 ;;;     (shortlex-less-than? (list 1 2 2) (list 1 2 3)) => true
-
-
 (define (shortlex-less-than? l1 l2)
   (cond
     [(equal? l1 l2) false]
@@ -110,7 +151,6 @@
      (shortlex-less-than? (rest l1) (rest l2))]
     [else false]
     ))
-
 (begin-for-test
   (check-equal?  (shortlex-less-than? (list) (list)) false
                  "it should return false")
@@ -129,47 +169,96 @@
   (check-equal? (shortlex-less-than? (list 1 2 2) (list 1 2 3)) true
                 "it should return true"))
 
-
-;; insert : Integer SortedIntList -> SortedIntList
-;; GIVEN: An integer and a sorted sequence of integers
-;; RETURNS: A new SortedIntList just like the
-;;   original, but with the new integer inserted.
+;; insert : IntList IntListList -> IntListList
+;; GIVEN: An IntList and A list of IntList 
+;  which is sorted by shortlex-less-than?
+;; RETURNS: A new IntListList just like the
+;;   original one, but with the new IntList inserted.
 ;; EXAMPLES:
-;; (insert 3 empty) = (list 3)
-;; (insert 3 (list 5 6)) = (list 3 5 6)
-;; (insert 3 (list -1 1 5 6)) 
-;;    = (list -1 1 3 5 6)
+;; (insert empty empty) = (list empty)
+;; (insert (list 6 2) (list 5 6)) = (list (list 5 6) (list 6 2))
 ;; STRATEGY: Use observer template for
-;; SortedIntList
+;; IntListList
 (define (insert n seq)
   (cond
     [(empty? seq) (list n)]
     [(shortlex-less-than? n (first seq)) (cons n seq)]
     [else (cons (first seq)
                 (insert n (rest seq)))]))
+(begin-for-test
+	(check-equal? (insert empty empty) (list empty))
+	(check-equal? (insert (list 6 2) (list (list 5 6))) (list (list 5 6) (list 6 2))))
 
+; musort: IntListList -> IntListList
+; Given: a list of IntList
+; Returns: a sorted IntListList of the given one sorting by
+; the function shortlex-less-than? if a list is shortlex-less-than another
+; the first one is in the first place.
+; Strategy: Use observer template for IntListList on permutaions
+; Examples: (mysort (list (list 3 2) (list 1 2))) -> (list (list 1 2) (list 3 2))
+; (mysort (list (list 1 2) (list 1 4))) -> (list (list 1 2) (list 1 4))
 (define (mysort permutations)
   (cond
     [(empty? permutations) empty]
     [else (insert (first permutations)
                   (mysort (rest permutations)))]))
-
+(begin-for-test
+	(check-equal? (mysort (list (list 3 2) (list 1 2))) (list (list 1 2) (list 3 2))
+		"it should be (list (list 1 2) (list 3 2)")
+	(check-equal? (mysort (list (list 1 2) (list 1 4))) (list (list 1 2) (list 1 4))
+		"it should be (list (list 1 2) (list 1 4)"))
+; arrangement: List IntList -> IntListList
+; Given: a tree-like list from permutation-list and a IntList which is empty when initial
+; for first time.
+; Returns: a list of all permutaions of one of the result IntListList
+; Strategy: use observer template of List
+; Examples: (arrangement tree-like-list empty) ->
+; (list (list 3 2 1) (list 2 3 1) (list 1 3 2) (list 3 1 2) (list 2 1 3) (list 1 2 3))
 (define (arrangement l1 l2)
   (cond
     [(empty? l1) l2]
-    [(number? (first l1)) (arrangement (rest l1) (cons (first l1) l2) )]
-    [else (adjunction l1 l2)]))
+    [(number? (first l1)) (arrangement (rest l1) (cons (first l1) l2))]
+    [(= (length (first l1)) 2)
+      (cons (arrangement (first l1) l2) (to-end? l1 l2))]
+      [else (append (arrangement (first l1) l2) (to-end? l1 l2))]))
 
-(define (adjunction l1 l2)
-  (if (= (length (first l1)) 2)
-      (cons (arrangement (first l1) l2) (to-end? l1 l2))
-      (append (arrangement (first l1) l2) (to-end? l1 l2)))
-  )
+;Tests
+(define tree-like-list 
+	(list (list 1 (list 2 3) (list 3 2)) 
+		(list 2 (list 3 1) (list 1 3)) 
+		(list 3 (list 1 2) (list 2 1))))
+(begin-for-test
+	(check-equal? (arrangement tree-like-list empty)
+		(list (list 3 2 1) (list 2 3 1) (list 1 3 2) (list 3 1 2) (list 2 1 3) (list 1 2 3))
+		"it is wrong of input"))
+
+; to-end? List IntList -> IntListList
+; Given: a tree-like list from permutation-list and a IntList
+; Returns: empty if rest of the tree-like list is empty and first is list
+; otherwise return arrangement
+; Strategy: use obserber tamplate of List and cases on List
+; Examples: (to-end? (list (list 1)) empty) -> empty
+; (to-end? (list (list 1) (list 2)) empty) -> (arrangement (list 2) empty)
 (define (to-end? l1 l2)
   (if (and (list? (first l1)) (empty? (rest l1)))
       empty
       (arrangement (rest l1) l2)))
+(begin-for-test
+	(check-equal?  (to-end? (list (list 1)) empty)  empty 
+		"it should be empty")
+	(check-equal? (to-end? (list (list 1) (list 2)) empty)
+	 (arrangement (list 2) empty) ""))
 
+; permutation-list: List Integer Integer Integer -> List
+; Given: a list and three integers which are the same
+; when initial and equal to the length of List.
+; Returns: a tree-like list which is used to generate 
+; a list of permutation.
+; Strategy: use observer template on List
+; Examples: (permutation-list (list 1 2 3) 3 3 3)
+; -> (list (list 1 (list 2 3) (list 3 2)) 
+; (list 2 (list 3 1) (list 1 3)) 
+; (list 3 (list 1 2) (list 2 1)))
 (define (permutation-list l n m count)
   (cond
     [(and (= count 0) (= m n)) empty]
@@ -180,6 +269,12 @@
     [(and (> count 0) (< n m))
      (cons (first l) (permutation-list (rest l) n (- m 1) n))]
     ))
+(begin-for-test 
+	(check-equal? (permutation-list (list 1 2 3) 3 3 3)
+		(list (list 1 (list 2 3) (list 3 2)) 
+			(list 2 (list 3 1) (list 1 3)) 
+			(list 3 (list 1 2) (list 2 1)))
+		"it returns wrong result"))
 
 ;;; permutations : IntList -> IntListList
 ;;; GIVEN: a list of integers
@@ -202,7 +297,6 @@
       (list l)
       (let* ([n (length l)] [l1 (permutation-list l n n n)])
         (mysort (arrangement l1 empty)))))
-
 (begin-for-test
   (check-equal?  (permutations (list)) (list (list))
                  "it should be  (list (list))")
