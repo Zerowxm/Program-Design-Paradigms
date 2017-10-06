@@ -1,0 +1,28 @@
+TA-1 Name: Rohan
+TA-2 Name: Yasaman
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set03
+Question Codewalked: 2
+
+Design Grade: A
+Presentation Grade: A
+
+================
+
+Data Design:
+
+-- coordinates cannot take negative values. so make the domain NonNegInt instead of Integer.
+
+================
+
+Contract/Purpose Statement/Design Strategy:
+
+-- avoid using magic numbers ( 649 in ball-collide-back-wall )
+
+-- unneceassary if in ball-collide-back-wall. 
+
+-- missing examples for helper functions
+
+-- define constants for key-events 
