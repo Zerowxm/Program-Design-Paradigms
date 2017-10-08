@@ -756,7 +756,6 @@
 
   (define (ball-y-equal-racket-y? b r)
      (let ([y (+ (racket-vy r) (racket-y r))])
-    
          (= y (+ (ball-y b) (ball-vy b)))))
 #;
   (define (collide-y? b r)

@@ -177,41 +177,41 @@
    (test-case
     "Test #1"
     ;ball-x
-    (check-equal? (ball-x (world-ball INITIAL-WORLD)) 330
+    (check-equal? (ball-x (first (world-balls INITIAL-WORLD))) 330
                   "Initial position of the ball in x should be 330"))
    
    (test-case
     "Test #2"
     ;ball-y
-    (check-equal? (ball-y (world-ball INITIAL-WORLD)) 384
+    (check-equal? (ball-y (first (world-balls INITIAL-WORLD))) 384
                   "Initial position of the ball in y should be 384"))
    
    (test-case
     "Test #3"
     ;ball-vx
-    (check-equal? (ball-vx (world-ball INITIAL-WORLD)) 0
+    (check-equal? (ball-vx (first (world-balls INITIAL-WORLD))) 0
                   "Initial velocity of the ball in x should be 0"))
    
    (test-case
     "Test #4"
     ;ball-vy
-    (check-equal? (ball-vy (world-ball INITIAL-WORLD)) 0
+    (check-equal? (ball-vy (first (world-balls INITIAL-WORLD))) 0
                   "Initial position of the ball in y should be 0"))
    
    (test-case
     "Test #5"
     ;ball-vx rally state
-    (check-equal? (ball-vx (world-ball
+    (check-equal? (ball-vx (first (world-balls
                             (world-after-tick
-                             WORLD-RALLY-STATE))) 3
+                             WORLD-RALLY-STATE)))) 3
                                                   "Velocity of the ball in x during rally state should be 3"))
    
    (test-case
     "Test #6"
     ;ball-vy rally state
-    (check-equal? (ball-vy (world-ball
+    (check-equal? (ball-vy (first (world-balls
                             (world-after-tick
-                             WORLD-RALLY-STATE))) -9
+                             WORLD-RALLY-STATE)))) -9
                                                   "Velocity of the ball in y during rally state should be -9"))
    
    (test-case
@@ -230,43 +230,43 @@
    (test-case
     "Test #9"
     ;; world after 32 ticks (x axis right side ) (424,96)
-    (check-equal? (ball-x (world-ball
-                           (world-after-n-ticks WORLD-RALLY-STATE 32))) 424
+    (check-equal? (ball-x (first (world-balls
+                           (world-after-n-ticks WORLD-RALLY-STATE 32)))) 424
                                                                         "ball in x axis should be at 424 after 32 ticks"))
    
    (test-case
     "Test #10"
     ;; world after 32 ticks (x axis right side ) (424,96)
-    (check-equal? (ball-vx (world-ball
-                            (world-after-n-ticks WORLD-RALLY-STATE 32))) -3
+    (check-equal? (ball-vx (first (world-balls
+                            (world-after-n-ticks WORLD-RALLY-STATE 32)))) -3
                                                                          "ball's velocity in vx should be -3 after 32 ticks"))
    
    (test-case
     "Test #11"
     ;; world after 32 ticks (x axis right side ) (424,96)
-    (check-equal? (ball-vy (world-ball
-                            (world-after-n-ticks WORLD-RALLY-STATE 32))) -9
+    (check-equal? (ball-vy (first (world-balls
+                            (world-after-n-ticks WORLD-RALLY-STATE 32)))) -9
                                                                          "ball's velocity in vy should be -9 after 32 ticks"))
    
    (test-case
     "Test #12"
     ;; world after 43 ticks (ball hits y axis top) (391,3)
-    (check-equal? (ball-y (world-ball
-                           (world-after-n-ticks WORLD-RALLY-STATE 43))) 3
+    (check-equal? (ball-y (first (world-balls
+                           (world-after-n-ticks WORLD-RALLY-STATE 43)))) 3
                                                                         "ball's position in y should be 3 after 43 ticks"))
    
    (test-case
     "Test #13"
     ;; world after 43 ticks (ball hits y axis top) (391,3)
-    (check-equal? (ball-vx (world-ball
-                            (world-after-n-ticks WORLD-RALLY-STATE 43))) -3
+    (check-equal? (ball-vx (first (world-balls
+                            (world-after-n-ticks WORLD-RALLY-STATE 43)))) -3
                                                                          "ball's velocity in vx should be -3 after 43 ticks"))
    
    (test-case
     "Test #14"
     ;; world after 43 ticks (ball hits y axis top) (391,3)
-    (check-equal? (ball-vy (world-ball
-                            (world-after-n-ticks WORLD-RALLY-STATE 43))) 9
+    (check-equal? (ball-vy (first (world-balls
+                            (world-after-n-ticks WORLD-RALLY-STATE 43)))) 9
                                                                          "ball's velocity in vy should be 9 after 43 ticks"))
    
    (test-case
@@ -293,15 +293,15 @@
    (test-case
     "Test #18"
     ;;  world after 65 ticks with racket in motion (after colliding with the racket)
-    (check-equal? (ball-vy (world-ball
-                            (world-after-n-ticks WORLD-RACKET-WITH-6SPEED-63TICK 2))) -15
+    (check-equal? (ball-vy (first (world-balls
+                            (world-after-n-ticks WORLD-RACKET-WITH-6SPEED-63TICK 2)))) -15
                                                                                 "ball's velocity in vy should be -15 after 65 ticks"))
    
    (test-case
     "Test #19"
     ;;  world after 65 ticks with racket in motion (after colliding with the racket)
-    (check-equal? (ball-vx (world-ball
-                            (world-after-n-ticks WORLD-RACKET-WITH-6SPEED-63TICK 2))) -3
+    (check-equal? (ball-vx (first (world-balls
+                            (world-after-n-ticks WORLD-RACKET-WITH-6SPEED-63TICK 2)))) -3
                                                                                 "ball's velocity in vx should be -3 after 65 ticks"))
    
    (test-case

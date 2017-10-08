@@ -204,12 +204,12 @@
                  "it returns wrong list")
   (check-equal? (permutations (list 1 2)) (list (list 1 2) (list 2 1))
                 "it should be (list (list 1 2) (list 2 1)))"))
-; arrangement: List IntList -> IntListList
-; Given: a tree-like list from permutation-list and a IntList which is empty when initial
+; arrangement: XList IntList -> IntListList
+; Given: a list of integers or XList or both and a IntList which is empty when initial
 ; for first time.
-; Returns: a list of all permutaions of one of the result IntListList
+; Returns: a list of IntList
 ; Strategy: use observer template of List
-; Examples: (arrangement tree-like-list empty) ->
+; Examples: (arrangement tree-like-xlist empty) ->
 ; (list (list 3 2 1) (list 2 3 1) (list 1 3 2) (list 3 1 2) (list 2 1 3) (list 1 2 3))
 (define (arrangement l1 l2)
   (cond
@@ -220,17 +220,17 @@
     [else (append (arrangement (first l1) l2) (to-end? l1 l2))]))
 
 ;Tests
-(define tree-like-list 
+(define tree-like-xlist 
   (list (list 1 (list 2 3) (list 3 2)) 
         (list 2 (list 3 1) (list 1 3)) 
         (list 3 (list 1 2) (list 2 1))))
 (begin-for-test
-  (check-equal? (arrangement tree-like-list empty)
+  (check-equal? (arrangement tree-like-xlist empty)
                 (list (list 3 2 1) (list 2 3 1) (list 1 3 2) (list 3 1 2) (list 2 1 3) (list 1 2 3))
                 "it is wrong of input"))
 
-; to-end? List IntList -> IntListList
-; Given: a tree-like list from permutation-list and a IntList
+; to-end? XList IntList -> IntListList
+; Given: a list of integers or XList or both and a IntList
 ; Returns: empty if rest of the tree-like list is empty and first is list
 ; otherwise return arrangement
 ; Strategy: use obserber tamplate of List and cases on List
@@ -246,11 +246,10 @@
   (check-equal? (to-end? (list (list 1) (list 2)) empty)
                 (arrangement (list 2) empty) ""))
 
-; permutation-list: List Integer Integer Integer -> List
-; Given: a list and three integers which are the same
-; when initial and equal to the length of List.
-; Returns: a tree-like list which is used to generate 
-; a list of permutation.
+; permutation-list: IntList Integer Integer Integer -> XList
+; Given: a list of integers
+; and three integers which are the same when initial and equal to the length of List.
+; Returns: a list of integers or XList or both
 ; Strategy: use observer template on List
 ; Examples: (permutation-list (list 1 2 3) 3 3 3)
 ; -> (list (list 1 (list 2 3) (list 3 2)) 
