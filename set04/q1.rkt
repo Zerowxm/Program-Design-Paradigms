@@ -44,6 +44,10 @@
 ;;;     (permutation-of? (list 1 2 3) (list 1 2)) => false
 ;;;     (permutation-of? (list) (list)) => true
 (define (permutation-of? l1 l2)
+  (equal? (sort l1 <) (sort l2 <)))
+; another way to implement the permutation-of? function using sort
+#;
+(define (permutation-of? l1 l2)
   (let ([count (max-count l2)])
     (permutation-comparator l1 l2 count)))
 (begin-for-test
@@ -59,14 +63,6 @@
                  "it should not be the permutation")
   (check-equal?  (permutation-of? (list) (list)) true
                  "it should be the permutation"))
-
-; another way to implement the permutation-of? function using sort
-#;
-(define (permutation-of? l1 l2)
-  (cond
-    [(and (empty? l1) (empty? l2)) true]
-    [(or (empty? l1) (empty? l2)) false]
-    [else (equal? (sort l1 <) (sort l2 <))]))
 
 ;;; permutation-comparator : IntList IntList Integer -> Boolean
 ;;; GIVEN: two lists of integers and the max-count of the second list
@@ -124,6 +120,7 @@
 ; Given: a list of integers where the list at least contains two integers.
 ; Returns: a list which is the same as the given list 
 ; except that the first item is changed to the end of the list
+; Strategy: use observer template on IntList
 ; Examples: (change-1st-to-end (list 1 2 3)) -> (list 2 3 1)
 (define (change-1st-to-end l)
   (append (rest l) (list (first l))))
@@ -210,48 +207,6 @@
   (check-equal? (permutations (list 1 2)) (list (list 1 2) (list 2 1))
                 "it should be (list (list 1 2) (list 2 1)))"))
 
-; arrangement: XList IntList -> IntListList
-; Given: a list of integers or XList or both and a IntList which is empty when initial
-; for first time.
-; Returns: a list of IntList
-; Strategy: use observer template of List
-; Examples: (arrangement tree-like-xlist empty) ->
-; (list (list 3 2 1) (list 2 3 1) (list 1 3 2) (list 3 1 2) (list 2 1 3) (list 1 2 3))
-(define (arrangement l1 l2)
-  (cond
-    [(empty? l1) l2]
-    [(number? (first l1)) (arrangement (rest l1) (cons (first l1) l2))]
-    [(= (length (first l1)) 2)
-     (cons (arrangement (first l1) l2) (to-end? l1 l2))]
-    [else (append (arrangement (first l1) l2) (to-end? l1 l2))]))
-
-;Tests
-(define tree-like-xlist 
-  (list (list 1 (list 2 3) (list 3 2)) 
-        (list 2 (list 3 1) (list 1 3)) 
-        (list 3 (list 1 2) (list 2 1))))
-(begin-for-test
-  (check-equal? (arrangement tree-like-xlist empty)
-                (list (list 3 2 1) (list 2 3 1) (list 1 3 2) (list 3 1 2) (list 2 1 3) (list 1 2 3))
-                "it is wrong of input"))
-
-; to-end? XList IntList -> IntListList
-; Given: a list of integers or XList or both and a IntList
-; Returns: empty if rest of the tree-like list is empty and first is list
-; otherwise return arrangement
-; Strategy: use obserber tamplate of List and cases on List
-; Examples: (to-end? (list (list 1)) empty) -> empty
-; (to-end? (list (list 1) (list 2)) empty) -> (arrangement (list 2) empty)
-(define (to-end? l1 l2)
-  (if (and (list? (first l1)) (empty? (rest l1)))
-      empty
-      (arrangement (rest l1) l2)))
-(begin-for-test
-  (check-equal?  (to-end? (list (list 1)) empty)  empty 
-                 "it should be empty")
-  (check-equal? (to-end? (list (list 1) (list 2)) empty)
-                (arrangement (list 2) empty) ""))
-
 ; permutation-list: IntList Integer Integer Integer -> XList
 ; Given: a list of integers
 ; and three integers which are the same when initial and equal to the length of List.
@@ -278,7 +233,49 @@
                       (list 3 (list 1 2) (list 2 1)))
                 "it returns wrong result"))
 
+; arrangement: XList IntList -> IntListList
+; Given: a list of integers or XList or both and a IntList which is empty when initial
+; for first time.
+; Returns: a list of IntList
+; Strategy: use observer template of List
+; Examples: (arrangement tree-like-xlist empty) ->
+; (list (list 3 2 1) (list 2 3 1) (list 1 3 2) (list 3 1 2) (list 2 1 3) (list 1 2 3))
+(define (arrangement l1 l2)
+  (cond
+    [(empty? l1) l2]
+    [(number? (first l1)) (arrangement (rest l1) (cons (first l1) l2))]
+    [(= (length (first l1)) 2)
+     (cons (arrangement (first l1) l2) (to-end? l1 l2))]
+    [else (append (arrangement (first l1) l2) (to-end? l1 l2))]))
+;Tests
+(define tree-like-xlist 
+  (list (list 1 (list 2 3) (list 3 2)) 
+        (list 2 (list 3 1) (list 1 3)) 
+        (list 3 (list 1 2) (list 2 1))))
+(begin-for-test
+  (check-equal? (arrangement tree-like-xlist empty)
+                (list (list 3 2 1) (list 2 3 1) (list 1 3 2) (list 3 1 2) (list 2 1 3) (list 1 2 3))
+                "it is wrong of input"))
+
+; to-end? XList IntList -> IntListList
+; Given: a list of integers or XList or both and a IntList
+; Returns: empty if rest of the given XList is empty and first of it is list
+; otherwise return arrangement
+; Strategy: use obserber tamplate of List and cases on List
+; Examples: (to-end? (list (list 1)) empty) -> empty
+; (to-end? (list (list 1) (list 2)) empty) -> (arrangement (list 2) empty)
+(define (to-end? l1 l2)
+  (if (and (list? (first l1)) (empty? (rest l1)))
+      empty
+      (arrangement (rest l1) l2)))
+(begin-for-test
+  (check-equal?  (to-end? (list (list 1)) empty)  empty 
+                 "it should be empty")
+  (check-equal? (to-end? (list (list 1) (list 2)) empty)
+                (arrangement (list 2) empty) ""))
+
 ;; User defined sort function which is defined before I use system sort function	
+;; so you do not need to use it unless you want
 ;; insert : IntList IntListList -> IntListList
 ;; GIVEN: An IntList and A list of IntList 
 ;  which is sorted by shortlex-less-than?
