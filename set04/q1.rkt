@@ -59,6 +59,7 @@
                  "it should not be the permutation")
   (check-equal?  (permutation-of? (list) (list)) true
                  "it should be the permutation"))
+
 ; another way to implement the permutation-of? function using sort
 #;
 (define (permutation-of? l1 l2)
@@ -72,6 +73,7 @@
 ;;; WHERE: neither list contains duplicate elements
 ;;; RETURNS: true if and only if one of the lists
 ;;;     is a permutation of the other
+;;; Strategy: user observer template on IntList
 ;;; EXAMPLES:
 ;;;     (permutation-comparator (list 1 2 3) (list 1 2 3)) => true
 ;;;     (permutation-comparator (list 3 1 2) (list 1 2 3)) => true
@@ -117,6 +119,7 @@
   (- count (- (length l) 2)))
 (begin-for-test
   (check-equal? (new-count 3 (list 1 2 3)) 2 "it should return 2"))
+
 ; change-1st-to-end: IntList -> IntList
 ; Given: a list of integers where the list at least contains two integers.
 ; Returns: a list which is the same as the given list 
@@ -147,6 +150,7 @@
 ;;;     (shortlex-less-than? (list 3 0) (list 1 2)) => false
 ;;;     (shortlex-less-than? (list 0 3) (list 1 2)) => true
 ;;;     (shortlex-less-than? (list 1 2 2) (list 1 2 3)) => true
+;;; Strategy: use observer template on IntList
 (define (shortlex-less-than? l1 l2)
   (cond
     [(or (equal? l1 l2) (empty? l2)) false]
@@ -188,6 +192,7 @@
 ;;;                   (list 3 1 2)
 ;;;                   (list 3 2 1))
 ;;; (permutations (list 1 2)) => (list (list 1 2) (list 2 1)
+;; Strategy: combine simpler functions
 (define (permutations l)
   (if (<= 0 (length l) 1)
       (list l)
@@ -204,6 +209,7 @@
                  "it returns wrong list")
   (check-equal? (permutations (list 1 2)) (list (list 1 2) (list 2 1))
                 "it should be (list (list 1 2) (list 2 1)))"))
+
 ; arrangement: XList IntList -> IntListList
 ; Given: a list of integers or XList or both and a IntList which is empty when initial
 ; for first time.
@@ -281,8 +287,7 @@
 ;; EXAMPLES:
 ;; (insert empty empty) = (list empty)
 ;; (insert (list 6 2) (list 5 6)) = (list (list 5 6) (list 6 2))
-;; STRATEGY: Use observer template for
-;; IntListList
+;; STRATEGY: Use observer template for IntListList
 (define (insert n seq)
   (cond
     [(empty? seq) (list n)]
