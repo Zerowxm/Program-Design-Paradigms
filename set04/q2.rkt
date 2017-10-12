@@ -444,9 +444,12 @@
 ;;; Examples: (world-after-tick world-to-end) => world-after-end
 ;;; (world-after-tick world-initial) => world-initial
 (define (world-after-tick w)
+  (let* ([bl (balls-collide-back-wall? (world-balls w))]
+    [w (make-world bl (world-racket w) (world-state w) (world-speed w)
+      (world-pause-time w))])
   (if (rally-end? w)
       (press-space w)
-      (diff-world-state-after-tick w)))
+      (diff-world-state-after-tick w))))
 ; Tests
 ; Test data
 (define racket-at-20-20-1-1 (make-racket 20 20 1 1 false '(0 0 0 0)))
@@ -516,7 +519,7 @@
     (if (equal? PAUSE (world-state w))
         false
         (or (racket-collide-top-wall? r)
-            (empty? (balls-collide-back-wall? bl))))))
+            (empty?  bl)))))
 ; Tests
 (begin-for-test 
   (check-equal? (rally-end? world-to-end) true "the world should end")
