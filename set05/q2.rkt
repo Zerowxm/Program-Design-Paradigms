@@ -568,7 +568,33 @@
 ;;;                         (call (op "*")
 ;;;                               (list (lit 4) (lit 5)))))))
 ;;;         => true
-          
+ (define (constant-expression? exp)
+   (cond
+     [(literal? exp) true]
+     [(block? exp) (constant-expression? (block-body exp))]
+     [(call? exp) (call-constant? exp)]
+     [else false]))
+(define cons-exp (block (var "x") (var "y") (call (block (var "z") (call (op "*")
+      (list (var "x") (var "y"))) (op "+")) (list (lit 3) (call (op "*")
+      (list (lit 4) (lit 5)))))))
+(begin-for-test
+     (check-true (constant-expression? cons-exp) "it should return true"))
+
+ (define (call-constant? call)
+     (and (call-operands-constant? (call-operands call)) 
+          (operation-expression? (call-operator call))))
+(define (call-operands-constant? es)
+  (cond
+    [(empty? es) true]
+    [else (and (constant-expression? (first es))
+               (call-operands-constant? (rest es)))]))
+
+(define (operation-expression? exp)
+     (cond
+          [(operation? exp) true]
+          [(block? exp) (operation-expression? (block-body exp))]
+          [else false]))
+           
 ;;; constant-expression-value : ArithmeticExpression -> Real
 ;;; GIVEN: an arithmetic expression
 ;;; WHERE: the expression is a constant expression

@@ -81,25 +81,6 @@
 ; Examples
 (define call-add-100 (make-func-call op-addition (list literal-100 literal-100)))
 
-
-; A Block is represented as a List of three arithmetic expressions 
-; CONSTRUCTOR TEMPLATE AND INTERPRETATION
-; (list var rhs body)
-; WHERE
-; - var :  Variable               is the variable of the block
-; - rhs :  ArithmeticExpression   is the expression whose value will become 
-;          the value of the variable defined by that block
-; - body : ArithmeticExpression   is the expression whose value will become 
-;          the value of the block expression 
-; Observer Template: 
-;; block-fn : Block -> ??
-;; (define (block-fn block)
-;;   (cond
-;;     [(empty? block) ...]
-;;     [else (... (first block))
-;;                (elist-fn (rest block)))]))
-;; Examples: (list (var 1) (op "+"))
-
 ; A Block is represented as a struct (make-block-exp var rhs body)
 ; - var :  Variable               is the variable of the block
 ; - rhs :  ArithmeticExpression   is the expression whose value will become 
