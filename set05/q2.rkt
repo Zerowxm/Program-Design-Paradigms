@@ -362,7 +362,7 @@
 
 (define (block? expression)
   (block-exp? expression))
-
+; Test
 (begin-for-test
   (check-true (literal? literal-100) "it should return true")
   (check-true (variable? variable-x15) "it should return true")
@@ -392,6 +392,7 @@
 ;;;                         (var "x")))))
 ;;;  => (list "x" "z") or (list "z" "x")
 ;;; (variables-defined-by block-x5) => (list "x5")
+;;; Strategy: cases on types of the expression
 (define (variables-defined-by exp)
   (cond
     [(block? exp) (without-duplicates (variables-defined-by-block exp))]
@@ -434,6 +435,7 @@
 (define (variables-defined-by-call exp)
   (append (variables-defined-by (call-operator exp)) 
           (variables-defined-by-list (call-operands exp))))
+; Test
 (begin-for-test
   (check-equal? (variables-defined-by-call call-exm) (list "z" "x")
                 "it should return (list 'z' 'x')"))
@@ -449,6 +451,7 @@
     [(empty? es) empty]
     [else (append (variables-defined-by (first es)) 
                   (variables-defined-by-list (rest es)))]))  
+; Test
 (begin-for-test
   (check-equal? (variables-defined-by-list exp-list) (list "x")
                 "it should return (list 'x')"))  
@@ -490,6 +493,7 @@
 ;;;                                (var "x"))
 ;;;                         (var "x")))))
 ;;;  => (list "x" "y") or (list "y" "x")
+;;; Strategy: cases on the type of the expression
 (define (variables-used-by exp)
   (cond
     [(block? exp) (without-duplicates (variables-used-by-block exp))]
@@ -527,6 +531,7 @@
 (define (variables-used-by-call exp)
   (append (variables-used-by (call-operator exp)) 
           (variables-used-by-list (call-operands exp))))
+; Test
 (begin-for-test
   (check-equal? (variables-used-by-call call-exm) (list "x" "x")
                 "it should return (list 'x' 'x')"))
@@ -542,6 +547,7 @@
     [(empty? es) empty]
     [else (append (variables-used-by (first es)) 
                   (variables-used-by-list (rest es)))]))  
+; Test
 (begin-for-test
   (check-equal? (variables-used-by-list exp-list) (list "x")
                 "it should return (list 'x')"))         
@@ -568,33 +574,67 @@
 ;;;                         (call (op "*")
 ;;;                               (list (lit 4) (lit 5)))))))
 ;;;         => true
+;;; Strategy: cases on the type of the expression
  (define (constant-expression? exp)
    (cond
      [(literal? exp) true]
      [(block? exp) (constant-expression? (block-body exp))]
      [(call? exp) (call-constant? exp)]
      [else false]))
+ ; Test
 (define cons-exp (block (var "x") (var "y") (call (block (var "z") (call (op "*")
       (list (var "x") (var "y"))) (op "+")) (list (lit 3) (call (op "*")
       (list (lit 4) (lit 5)))))))
+(define cons-call (call (block (var "z") (call (op "*")
+      (list (var "x") (var "y"))) (op "+")) (list (lit 3) (call (op "*")
+      (list (lit 4) (lit 5))))))
 (begin-for-test
      (check-true (constant-expression? cons-exp) "it should return true"))
 
+;;; call-constant? Call -> Boolean
+;;; GIVEN: an Call
+;;; RETURNS: true if and only if the expression is a constant expression
+;;; Examples: (call-constant? call-exm) => true
+;;;  (call-constant? call-exm) => false
+;;; Strategy: combine simpler functions
  (define (call-constant? call)
      (and (call-operands-constant? (call-operands call)) 
           (operation-expression? (call-operator call))))
+; Test
+(begin-for-test
+     (check-false (call-constant? call-exm) "it should be false")
+     (check-true (call-constant? cons-call) "it should be true"))
+
+;;; call-operands-constant? ArithmeticExpressionList -> Boolean
+;;; GIVEN: an list of ArithmeticExpression
+;;; RETURNS: true if and only if all the expressions is constant expressions
+;;; Examples: (call-operands-constant? exp-list) => true
+;;; Strategy: combine simpler functions
 (define (call-operands-constant? es)
   (cond
     [(empty? es) true]
     [else (and (constant-expression? (first es))
                (call-operands-constant? (rest es)))]))
+; Test
+(begin-for-test
+     (check-false (call-operands-constant? exp-list) "it should be false")
+     (check-true (call-operands-constant? (call-operands cons-call)) "it should be true"))
 
+; operation-expression? ArithmeticExpression -> Boolean
+; Given:  an arithmentic expression
+; Returns: true iff the expression is operation expression
+; Examples: (operation-expression? op-addition) => true
+; Strategy: cases on whether the given expression is an operation expression
 (define (operation-expression? exp)
      (cond
           [(operation? exp) true]
           [(block? exp) (operation-expression? (block-body exp))]
           [else false]))
-           
+; Test
+(begin-for-test
+     (check-true (operation-expression? op-addition) "it should be true")
+     (check-false (operation-expression? block-x5) "it should be false"))       
+
 ;;; constant-expression-value : ArithmeticExpression -> Real
 ;;; GIVEN: an arithmetic expression
 ;;; WHERE: the expression is a constant expression
@@ -614,3 +654,33 @@
 ;;;                         (call (op "*")
 ;;;                               (list (lit 4) (lit 5)))))))
 ;;;         => 23
+(define exp-value (block (var "x") (var "y") 
+     (call (block (var "z") (call (op "*") (list (var "x") (var "y")))
+          (op "+"))
+     (list (lit 3)
+           (call (op "*")
+               (list (lit 4) (lit 5)))))))
+       
+(define (constant-expression-value exp)
+     (cond
+          [(literal? exp) (literal-value exp)]
+          [(block? exp) (constant-expression-value (block-body exp))]
+          [(call? exp) (call-value exp)]))
+; Test
+(begin-for-test
+     (check-equal? (constant-expression-value (call (op "/") (list (lit 15) (lit 3))))
+                   5 "it should be 5")
+     (check-equal? (constant-expression-value exp-value) 23))
+(define (call-value call)
+     (let ([op (operation-name (constant-expression-value (call-operator call)))])
+          (cond
+               [(string=? op "+") (call-operation (call-operands call) +)]
+               [(string=? op "-") (call-operation (call-operands call) -)]
+               [(string=? op "*") (call-operation (call-operands call) *)]
+               [(string=? op "/") (call-operation (call-operands call) /)])))
+
+(define (call-operation es op)
+     (cond
+       [(empty? (rest es)) (constant-expression-value (first es))]
+       [else (op (constant-expression-value (first es))
+                 (call-operation (rest es) op))]))
