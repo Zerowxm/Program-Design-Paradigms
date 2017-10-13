@@ -1,0 +1,22 @@
+TA-1 Name: Sushant
+TA-2 Name: Yasaman
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set04
+Question Codewalked: 2
+
+Design Grade: A
+Presentation Grade: A
+
+================
+
+Contract/Purpose Statement/Design Strategy:
+
+-- when mentioning a data type of list, specify what list it is (BallList, ... )
+
+-- examples should show what an example call of function returns ( dont explain in english, but in code )
+
+-- world-to-scene returns an image which violates the contract
+
+-- dont do too many operations in one function
