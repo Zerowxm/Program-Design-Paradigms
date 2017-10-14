@@ -136,11 +136,12 @@
 ; -- (cons ArithmeticExpression ArithmeticExpressionList)
 ; Observer Template: 
 ;; elist-fn : ArithmeticExpressionList -> ??
-;; (define (elist-fn es)
-;;   (cond
-;;     [(empty? es) ...]
-;;     [else (... (first es))
-;;                (elist-fn (rest es)))]))
+#;
+(define (elist-fn es)
+   (cond
+     [(empty? es) ...]
+     [else (... (first es))
+                (elist-fn (rest es))]))
 ;; Examples: (list (var 1) (op "+"))
 
 ; A OperationExpression is represented as either
@@ -259,7 +260,7 @@
 (begin-for-test
   (check-equal? (call-operator call-add-100) op-addition "it should be op-addition")
   (check-equal? (call-operator (call (op "-") (list (lit 7) (lit 2.5))))
-                (op "-") "it should be (op '-')"))
+                (op "-") "it should be (op \"- \")"))
 
 ;;; call-operands : Call -> ArithmeticExpressionList
 ;;; GIVEN: a call
@@ -364,7 +365,8 @@
 ;;;         => false
 ;;;     (call? call-add-100) => true
 ;;;      (block? (block-body (block (var "y") (lit 3) (var "z")))) => false
-;;; Strategy: use observer template of Literal, Variable, Operation, Call, or Block
+;;; Strategy: use observer template
+;;; of Literal, Variable, Operation, Call, or Block
 (define (call? expression)
   (func-call? expression))
 
@@ -403,18 +405,22 @@
 (define (variables-defined-by exp)
   (cond
     [(block? exp) (without-duplicates (variables-defined-by-block exp))]
-    [(call? exp) (variables-defined-by-call exp)]
+    [(call? exp) (without-duplicates (variables-defined-by-call exp))]
     [else empty]
     )) 
 ; Test
-(define exp-exm (block (var "x") (var "y") (call (block (var "z") (var "x") (op "+"))
-                                                 (list (block (var "x") (lit 5) (var "x")) (var "x")))))
+(define exp-exm (block (var "x") (var "y")
+                       (call (block (var "z") (var "x") (op "+"))
+                             (list (block (var "x")
+                                          (lit 5) (var "x")) (var "x")))))
 (define call-exm (call (block (var "z") (var "x") (op "+"))
                        (list (block (var "x") (lit 5) (var "x")) (var "x"))))
 (define exp-list (call-operands call-exm))
 (begin-for-test
-  (check-equal? (variables-defined-by block-x5) (list "x5"))
-  (check-equal? (variables-defined-by exp-exm) (list "z" "x")))
+  (check-equal? (variables-defined-by block-x5) (list "x5")
+                "it should return '(\"x5\")")
+  (check-equal? (variables-defined-by exp-exm) '("z" "x")
+                "it should be '(\"z\" \"x\")"))
 
 ; variables-defined-by-block: ArithmeticExpression -> StringList
 ; Given: an arithmetic expression 
@@ -423,11 +429,11 @@
 ; Strategy: use observer template for Block and Variable 
 ; Examples: (variables-defined-by-block block-x5) => (list "x5")
 (define (variables-defined-by-block exp)
-  (cond
-    [(variable? exp) (list (variable-name exp))]
-    [(block? exp) (append (variables-defined-by-block (block-var exp)) 
-                          (variables-defined-by-block (block-body exp)))]
-    [else (variables-defined-by exp)]))
+  (if (variable? exp)
+      (list (variable-name exp))
+      (append (variables-defined-by-block (block-var exp)) 
+              (variables-defined-by (block-rhs exp)) 
+              (variables-defined-by (block-body exp)))))
 ; Test
 (begin-for-test
   (check-equal? (variables-defined-by-block block-x5) (list "x5")))
@@ -443,8 +449,8 @@
           (variables-defined-by-list (call-operands exp))))
 ; Test
 (begin-for-test
-  (check-equal? (variables-defined-by-call call-exm) (list "z" "x")
-                "it should return (list 'z' 'x')"))
+  (check-equal? (variables-defined-by-call call-exm)  '("z" "x")
+                "it should return  '(\"z\" \"x\")"))
 
 ; variables-defined-by-list: ArithmeticExpressionList -> StringList
 ; Given: a list of a rithmetic expression
@@ -482,7 +488,7 @@
 ;;; RETURNS: a list of the names of all variables used in
 ;;;     the expression, including variables used in a block
 ;;;     on the right hand side of its definition or in its body,
-;;;     but not including variables used by a block unless
+;;;     but not including variables defined by a block unless
 ;;;     they are also used
 ;;; EXAMPLE:
 ;;;     (variables-used-by
@@ -499,8 +505,9 @@
 ;;; Strategy: cases on the type of the expression
 (define (variables-used-by exp)
   (cond
+    [(variable? exp) (list (variable-name exp))]
     [(block? exp) (without-duplicates (variables-used-by-block exp))]
-    [(call? exp) (variables-used-by-call exp)]
+    [(call? exp) (without-duplicates (variables-used-by-call exp))]
     [else empty])) 
 ; Tests
 (begin-for-test
@@ -511,31 +518,31 @@
 ; Returns: a list of the names of all variables used by
 ;          all blocks that occur within the expression 
 ; Strategy: use observer template for Block and Variable 
-; Examples: (variables-used-by-block block-x5) => (list "x5")
+; Examples: (variables-used-by-block block-x5) => (list "x6" "x7")
+; (variables-used-by-block exp-exm) => (list "y" "x" )
 (define (variables-used-by-block exp)
-  (cond
-    [(variable? exp) (list (variable-name exp))]
-    [(block? exp) (append (variables-used-by-block (block-rhs exp)) 
-                          (variables-used-by-block (block-body exp)))]
-    [else (variables-used-by exp)]))
+  (append (variables-used-by (block-rhs exp)) 
+          (variables-used-by (block-body exp))))
 ; Test
 (begin-for-test
-  (check-equal? (variables-used-by-block block-x5) (list))
-  (check-equal? (variables-used-by-block exp-exm) (list "y" "x" "x")))
+  (check-equal? (variables-used-by-block block-x5) (list "x6" "x7")
+                "it should return  '(\"x6\" \"x7\")")
+  (check-equal? (variables-used-by-block exp-exm) (list "y" "x" )
+                "it should return '(\"y\" \"x\")"))
 
 ; variables-used-by-call: Call -> StringList
 ; Given: a call
 ; Returns: a list of the names of all variables used by
 ;          all blocks that occur within the expression 
 ; Strategy: use observer template for Call on exp
-; Examples: (variables-used-by-call call-exm) => (list "x" "x")
+; Examples: (variables-used-by-call call-exm) => (list "x" "x" "x")
 (define (variables-used-by-call exp)
   (append (variables-used-by (call-operator exp)) 
           (variables-used-by-list (call-operands exp))))
 ; Test
 (begin-for-test
-  (check-equal? (variables-used-by-call call-exm) (list "x" "x")
-                "it should return (list 'x' 'x')"))
+  (check-equal? (variables-used-by-call call-exm) (list "x" "x" "x")
+                "it should return (list \"x\" \"x\" \"x\")"))
 
 ; variables-used-by-list: ArithmeticExpressionList -> StringList
 ; Given: a list of a rithmetic expression
@@ -550,8 +557,8 @@
                   (variables-used-by-list (rest es)))]))  
 ; Test
 (begin-for-test
-  (check-equal? (variables-used-by-list exp-list) (list "x")
-                "it should return (list 'x')"))         
+  (check-equal? (variables-used-by-list exp-list) (list "x" "x")
+                "it should return (list \"x\" \"x\")"))         
 
 ;;; constant-expression? : ArithmeticExpression -> Boolean
 ;;; GIVEN: an arithmetic expression
@@ -576,21 +583,24 @@
 ;;;                               (list (lit 4) (lit 5)))))))
 ;;;         => true
 ;;; Strategy: cases on the type of the expression
- (define (constant-expression? exp)
-   (cond
-     [(literal? exp) true]
-     [(block? exp) (constant-expression? (block-body exp))]
-     [(call? exp) (call-constant? exp)]
-     [else false]))
- ; Test
-(define const-exp (block (var "x") (var "y") (call (block (var "z") (call (op "*")
-      (list (var "x") (var "y"))) (op "+")) (list (lit 3) (call (op "*")
-      (list (lit 4) (lit 5)))))))
-(define const-call (call (block (var "z") (call (op "*")
-      (list (var "x") (var "y"))) (op "+")) (list (lit 3) (call (op "*")
-      (list (lit 4) (lit 5))))))
+(define (constant-expression? exp)
+  (cond
+    [(literal? exp) true]
+    [(block? exp) (constant-expression? (block-body exp))]
+    [(call? exp) (call-constant? exp)]
+    [else false]))
+; Test
+(define const-exp (block (var "x") (var "y")
+                         (call (block (var "z")
+                                      (call (op "*") (list (var "x") (var "y")))
+                                      (op "+")) (list (lit 3) (call (op "*")
+                                                                    (list (lit 4) (lit 5)))))))
+(define const-call (call (block (var "z")
+                                (call (op "*") (list (var "x") (var "y")))
+                                (op "+")) (list (lit 3) (call (op "*")
+                                                              (list (lit 4) (lit 5))))))
 (begin-for-test
-     (check-true (constant-expression? const-exp) "it should return true"))
+  (check-true (constant-expression? const-exp) "it should return true"))
 
 ;;; call-constant? Call -> Boolean
 ;;; GIVEN: an Call
@@ -598,19 +608,19 @@
 ;;; Examples: (call-constant? call-exm) => true
 ;;;  (call-constant? call-exm) => false
 ;;; Strategy: combine simpler functions
- (define (call-constant? call)
-     (and (call-operands-constant? (call-operands call)) 
-          (operation-expression? (call-operator call))))
+(define (call-constant? call)
+  (and (call-operands-constant? (call-operands call)) 
+       (operation-expression? (call-operator call))))
 ; Test
 (begin-for-test
-     (check-false (call-constant? call-exm) "it should be false")
-     (check-true (call-constant? const-call) "it should be true"))
+  (check-false (call-constant? call-exm) "it should be false")
+  (check-true (call-constant? const-call) "it should be true"))
 
 ;;; call-operands-constant? ArithmeticExpressionList -> Boolean
 ;;; GIVEN: an list of ArithmeticExpression
 ;;; RETURNS: true if and only if all the expressions is constant expressions
 ;;; Examples: (call-operands-constant? exp-list) => true
-;;; Strategy: combine simpler functions
+;;; Strategy: use observer template of ArithmeticExpressionList on es
 (define (call-operands-constant? es)
   (cond
     [(empty? es) true]
@@ -618,8 +628,9 @@
                (call-operands-constant? (rest es)))]))
 ; Test
 (begin-for-test
-     (check-false (call-operands-constant? exp-list) "it should be false")
-     (check-true (call-operands-constant? (call-operands const-call)) "it should be true"))
+  (check-false (call-operands-constant? exp-list) "it should be false")
+  (check-true (call-operands-constant? (call-operands const-call))
+              "it should be true"))
 
 ; operation-expression? ArithmeticExpression -> Boolean
 ; Given:  an arithmentic expression
@@ -627,14 +638,14 @@
 ; Examples: (operation-expression? op-addition) => true
 ; Strategy: cases on whether the given expression is an operation expression
 (define (operation-expression? exp)
-     (cond
-          [(operation? exp) true]
-          [(block? exp) (operation-expression? (block-body exp))]
-          [else false]))
+  (cond
+    [(operation? exp) true]
+    [(block? exp) (operation-expression? (block-body exp))]
+    [else false]))
 ; Test
 (begin-for-test
-     (check-true (operation-expression? op-addition) "it should be true")
-     (check-false (operation-expression? block-x5) "it should be false"))       
+  (check-true (operation-expression? op-addition) "it should be true")
+  (check-false (operation-expression? block-x5) "it should be false"))       
 
 ;;; constant-expression-value : ArithmeticExpression -> Real
 ;;; GIVEN: an arithmetic expression
@@ -655,25 +666,45 @@
 ;;;                         (call (op "*")
 ;;;                               (list (lit 4) (lit 5)))))))
 ;;;         => 23     
+;;; Strategy: cases on the type of constant expression
 (define (constant-expression-value exp)
-     (cond
-          [(literal? exp) (literal-value exp)]
-          [(block? exp) (constant-expression-value (block-body exp))]
-          [(call? exp) (call-value exp)]))
+  (cond
+    [(literal? exp) (literal-value exp)]
+    [(block? exp) (constant-expression-value (block-body exp))]
+    [(call? exp) (call-value exp)]))
 ; Test data
 (define exp-value (block (var "x") (var "y") 
-     (call (block (var "z") (call (op "*") (list (var "x") (var "y")))
-          (op "+"))
-     (list (lit 3)
-           (call (op "*")
-               (list (lit 4) (lit 5)))))))
+                         (call (block (var "z") (call (op "*")
+                                                      (list (var "x")(var "y")))
+                                      (op "+"))
+                               (list (lit 3)
+                                     (call (op "*")
+                                           (list (lit 4) (lit 5)))))))
 (define op-block (block (var "z") (call (op "*") (list (var "x") (var "y")))
-          (op "+")))
+                        (op "+")))
 ; Test
 (begin-for-test
-     (check-equal? (constant-expression-value (call (op "/") (list (lit 15) (lit 3))))
-                   5 "it should be 5")
-     (check-equal? (constant-expression-value exp-value) 23))
+  (check-equal? (constant-expression-value (call (op "/") (list (lit 15) (lit 3))))
+                5 "it should be 5")
+  (check-equal? (constant-expression-value exp-value) 23))
+
+; call-value : Call -> Real
+; Given: a call
+; Returns: the numerical value of the expression 
+; Examples: (call-value const-call) => 23
+; (call-value (call (op "-") (list (lit 15) (lit 5)))) => 10
+(define (call-value call)
+  (let ([op (operator-value (call-operator call))])
+    (cond
+      [(string=? op "+") (call-operation (call-operands call) +)]
+      [(string=? op "-") (call-operation (call-operands call) -)]
+      [(string=? op "*") (call-operation (call-operands call) *)]
+      [(string=? op "/") (call-operation (call-operands call) /)])))
+; Test
+(begin-for-test
+  (check-equal? (call-value const-call) 23 "it should be 23")
+  (check-equal? (call-value (call (op "-") (list (lit 15) (lit 5)))) 10 
+                "it should be 10"))
 
 ; operator-value : OperationExpression -> String
 ; Given: an operation expression
@@ -682,46 +713,27 @@
 ; (operator-value op-block) => "+"
 ; Strategy: cases on the type of operation expresssion
 (define (operator-value exp)
-     (cond
-          [(operation? exp) (operation-name exp)]
-          [(block? exp) (operator-value (block-body exp))]))
+  (cond
+    [(operation? exp) (operation-name exp)]
+    [(block? exp) (operator-value (block-body exp))]))
 ; Test
 (begin-for-test
-     (check-equal? (operator-value op-addition) "+")
-     (check-equal? (operator-value op-block) "+"))
+  (check-equal? (operator-value op-addition) "+")
+  (check-equal? (operator-value op-block) "+"))
 
-; call-value : Call -> Real
-; Given: a call
-; Returns: the numerical value of the expression 
-; Examples: (call-value const-call) => 23
-; (call-value (call (op "-") (list (lit 15) (lit 5)))) => 10
-(define (call-value call)
-     (let ([op (operator-value (call-operator call))])
-          (cond
-               [(string=? op "+") (call-operation (call-operands call) +)]
-               [(string=? op "-") (call-operation (call-operands call) -)]
-               [(string=? op "*") (call-operation (call-operands call) *)]
-               [(string=? op "/") (call-operation (call-operands call) /)])))
-; Test
-(begin-for-test
-     (check-equal? (call-value const-call) 23 "it should be 23")
-     (check-equal? (call-value (call (op "-") (list (lit 15) (lit 5)))) 10 
-          "it should be 10"))
-
-; call-operation : ArithmeticExpressionList -> Real
-; Given: a list of arithmetic expressions and the operation on the expressions
+; call-operation : ArithmeticExpressionList Procedure -> Real
+; Given: a list of arithmetic expressions
+; and the operation procedure on the expressions
 ; Returns: the numerical value of the expression
 ; Examples: (call-operation (list (lit 15) (lit 5)) -) => 10
 ; Strategy: use observer template for ArithmeticExpressionList on es
 (define (call-operation es op)
-     (cond
-       [(empty? (rest es)) (constant-expression-value (first es))]
-       [else (op (constant-expression-value (first es))
-                 (call-operation (rest es) op))]))
+  (cond
+    [(empty? (rest es)) (constant-expression-value (first es))]
+    [else (op (constant-expression-value (first es))
+              (call-operation (rest es) op))]))
 ; Test
 (begin-for-test
-     (check-equal? (call-operation (list (lit 15) (lit 5)) -) 10)
-     "it should be 10")
+  (check-equal? (call-operation (list (lit 15) (lit 5)) -) 10)
+  "it should be 10")
 
-
- 

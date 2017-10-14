@@ -1,3 +1,6 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname q1) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require rackunit)
 (require "extras.rkt")
 
@@ -20,11 +23,12 @@
      operation?
      call?
      block?)
-(check-location "05" "q2.rkt")
+(check-location "05" "q1.rkt")
 
 ; A Literal is represented as a struct (make-literal value)
 ; - value Real   is a real number Literal represents
 (define-struct literal (value))
+; Constructor template
 ; (make-literal Real)
 ; Observer template
 ; literal-fn : lit -> ??
@@ -34,12 +38,12 @@
 ; A Variable is represented as a struct (make-variable name)
 ; name : String (any string will do) the name of variable
 (define-struct variable (name))
+; Constructor template
 ; (make-variable String)
 ; Observer teamplate
 ; variable-fn : Variable -> ??
 (define (variable-fn var)
   (...(variable-name var)))
-
 
 ;;; An OperationName is represented as one of the following strings:
 ;;;     -- "+"      (indicating addition)
@@ -61,6 +65,7 @@
 ; A Operation is represented as a struct (make-operation name)
 ; name : OperationName  is the name of the operation
 (define-struct operation (name))
+; Constructor template
 ; (make-operation OperationName)
 ; Observer tamplate
 ; operation-fn : Operation -> ??
@@ -70,8 +75,9 @@
 
 ; A Call is represented as a struct (make-func-call operator operands)
 ; - operator : ArithmeticExpression  is the operator expression of that call
-; - operands : ArithmeticExpressionList  is the operand expressions of that call
+; - operands :   is the operand expressions of that call
 (define-struct func-call (operator operands))
+; Constructor template
 ; (make-func-call ArithmeticExpression ArithmeticExpressionList)
 ; Observer template
 ; func-call-fn : Call => ??
@@ -79,7 +85,7 @@
   (...(func-call-operator call)
       (func-call-operands call)))
 ; Examples
-(define call-add-100 (make-func-call op-addition (list literal-100 literal-100)))
+; (define call-add-100 (make-func-call op-addition (list literal-100 literal-100)))
 
 ; A Block is represented as a struct (make-block-exp var rhs body)
 ; - var :  Variable               is the variable of the block
@@ -88,6 +94,7 @@
 ; - body : ArithmeticExpression   is the expression whose value will become 
 ;          the value of the block expression
 (define-struct block-exp (var rhs body))
+; Constructor template
 ; (make-block Variable ArithmeticExpression ArithmeticExpression)
 ; Observer template
 ; block-fn : Block -> ??
@@ -96,9 +103,8 @@
       (block-exp-rhs block)
       (block-exp-body block)))
 ; Examples
-(define block-x5 (make-block-exp (var "x5")  (lit 5) 
-                                 (call (op "*") (list (var "x6") (var "x7")))))
-
+;(define block-x5 (make-block-exp (var "x5")  (lit 5) 
+;                                 (call (op "*") (list (var "x6") (var "x7")))))
 
 ;;; An ArithmeticExpression is one of
 ;;;     -- a Literal
@@ -115,27 +121,28 @@
         ((variable? exp) ...)
         ((operation? exp) ...)
         ((call? exp) ...)
-        ((block? exp) ...)))
- 
+        ((block? exp) ...))) 
 
 ; ArithmeticExpressionList is one of
 ; -- empty
 ; -- (cons ArithmeticExpression ArithmeticExpressionList)
 ; Observer Template: 
 ;; elist-fn : ArithmeticExpressionList -> ??
-;; (define (elist-fn es)
-;;   (cond
-;;     [(empty? es) ...]
-;;     [else (... (first es))
-;;                (elist-fn (rest es)))]))
+#;
+(define (elist-fn es)
+   (cond
+     [(empty? es) ...]
+     [else (... (first es))
+                (elist-fn (rest es))]))
 ;; Examples: (list (var 1) (op "+"))
 
 ;;;
 ;;; lit : Real -> Literal
 ;;; GIVEN: a real number
 ;;; RETURNS: a literal that represents that number
-;;; (lit 1) => (make-literal 1)
+;;; Examples: (lit 1) => (make-literal 1)
 ;;; (lit 100) => literal-100
+;;; Strategy: use constructor template of Literal 
 (define (lit value)
   (make-literal value))
 ; Test
@@ -154,7 +161,8 @@
 ;;; WHERE: the string begins with a letter and contains
 ;;;     nothing but letters and digits
 ;;; RETURNS: a variable whose name is the given string
-;;; (var "x15") => variable-x15
+;;; Strategy: use constructor template of Variable 
+;;; Examples: (var "x15") => variable-x15
 (define (var name)
   (make-variable name))
 ; Tests
@@ -166,13 +174,14 @@
 ;;; GIVEN: a variable
 ;;; RETURNS: the name of that variable
 ;;; EXAMPLE: (variable-name (var "x15")) => "x15"
-
 ; Test
 (begin-for-test
   (check-equal? (variable-name variable-x15) "x15" "it should return x15"))
+
 ;;; op : OperationName -> Operation
 ;;; GIVEN: the name of an operation
 ;;; RETURNS: the operation with that name
+;;; Strategy: use constructor template of Operation 
 ;;; EXAMPLES: (op addition) => op-addition
 (define (op name)
   (make-operation name))
@@ -189,20 +198,22 @@
 ;;;     (operation-name (op "/")) => "/"
 ; Tests
 (begin-for-test
-  (check-equal? (operation-name op-addition) addition "it should be addition"))
+  (check-equal? (operation-name op-addition) addition "it should be addition")
+  (check-equal? (operation-name (op "+")) "+" "it should be '+'"))
+
 ;;; call : ArithmeticExpression ArithmeticExpressionList -> Call
 ;;; GIVEN: an operator expression and a list of operand expressions
 ;;; RETURNS: a call expression whose operator and operands are as
 ;;;     given
+;;; Strategy: use constructor template of Call 
 ;;; EXAMPLES: (call op-addition (list literal-100 literal-100))=> call-add-100
 (define (call operator operands)
   (make-func-call operator operands))
 ; Test
-#;
+(define call-add-100 (make-func-call op-addition (list literal-100 literal-100)))
 (begin-for-test
   (check-equal? (call op-addition (list literal-100 literal-100)) call-add-100
                 "it should be call-add-100"))
-(check-expect (call op-addition (list literal-100 literal-100)) call-add-100)
 
 ;;; call-operator : Call -> ArithmeticExpression
 ;;; GIVEN: a call
@@ -211,16 +222,14 @@
 ;;;     (call-operator (call (op "-")
 ;;;                          (list (lit 7) (lit 2.5))))
 ;;;         => (op "-")
+;;; Strategy: use observer template of Call on call 
 (define (call-operator call)
   (func-call-operator call))
 ; Test
-#;
 (begin-for-test
   (check-equal? (call-operator call-add-100) op-addition "it should be op-addition")
   (check-equal? (call-operator (call (op "-") (list (lit 7) (lit 2.5))))
-                (op "-") "it should be (op "-")"))
-(check-expect (call-operator call-add-100) op-addition )
-(check-expect (call-operator (call (op "-") (list (lit 7) (lit 2.5)))) (op "-"))
+                (op "-") "it should be (op \"- \")"))
 
 ;;; call-operands : Call -> ArithmeticExpressionList
 ;;; GIVEN: a call
@@ -229,18 +238,15 @@
 ;;;     (call-operands (call (op "-")
 ;;;                          (list (lit 7) (lit 2.5))))
 ;;;         => (list (lit 7) (lit 2.5))
+;;; Strategy: use observer template of Call on call 
 (define (call-operands call)
   (func-call-operands call))
 ; Test
-#;
 (begin-for-test
   (check-equal? (call-operands call-add-100) (list literal-100 literal-100)
                 "it should be (list literal-100 literal-100)")
   (check-equal? (call-operands (call (op "-") (list (lit 7) (lit 2.5))))
                 (list (lit 7) (lit 2.5)) "it should be (list (lit 7) (lit 2.5))"))
-(check-expect (call-operands call-add-100) (list literal-100 literal-100))
-(check-expect (call-operands (call (op "-") (list (lit 7) (lit 2.5))))
-              (list (lit 7) (lit 2.5)))
 
 ;;; block : Variable ArithmeticExpression ArithmeticExpression
 ;;;             -> ArithmeticExpression
@@ -252,9 +258,12 @@
 ;;;                       (call (op "*")
 ;;;                             (list (var "x6") (var "x7")))))
 ;;; => block-x5
+;;; Strategy: use construct template of Block  
 (define (block var rhs body)
   (make-block-exp var rhs body))  
 ; Test
+(define block-x5 (make-block-exp (var "x5")  (lit 5) 
+                                 (call (op "*") (list (var "x6") (var "x7")))))
 (begin-for-test
   (check-equal? (block (var "x5")  (lit 5) (call (op "*") (list (var "x6") (var "x7"))))
                 block-x5 "it should be block-x5"))
@@ -268,6 +277,7 @@
 ;;;                       (call (op "*")
 ;;;                             (list (var "x6") (var "x7")))))
 ;;;         => (var "x5")
+;;; Strategy: use observer template of Block on block
 (define (block-var block)
   (block-exp-var block))    
 ; Test
@@ -284,6 +294,7 @@
 ;;;                       (call (op "*")
 ;;;                             (list (var "x6") (var "x7")))))
 ;;;         => (lit 5)
+;;; Strategy: use observer template of Block on block
 (define (block-rhs block)
   (block-exp-rhs block))
 ; Test
@@ -300,14 +311,13 @@
 ;;;                        (call (op "*")
 ;;;                              (list (var "x6") (var "x7")))))
 ;;;         => (call (op "*") (list (var "x6") (var "x7")))
+;;; Strategy: use observer template of Block on block
 (define (block-body block)
   (block-exp-body block))
 ; Test
-#;
 (begin-for-test
   (check-equal? (block-body block-x5) (call (op "*") (list (var "x6") (var "x7")))
-                "it should be (call (op "*") (list (var 'x6') (var 'x7')))"))
-(check-expect (block-body block-x5) (call (op "*") (list (var "x6") (var "x7"))))        
+                "it should be (call (op '*') (list (var 'x6') (var 'x7')))"))
 
 ;;; literal?   : ArithmeticExpression -> Boolean
 ;;; variable?  : ArithmeticExpression -> Boolean
@@ -322,12 +332,16 @@
 ;;;         => true
 ;;;     (variable? (block-rhs (block (var "y") (lit 3) (var "z"))))
 ;;;         => false
+;;;     (call? call-add-100) => true
+;;;      (block? (block-body (block (var "y") (lit 3) (var "z")))) => false
+;;; Strategy: use observer template
+;;; of Literal, Variable, Operation, Call, or Block
 (define (call? expression)
   (func-call? expression))
 
 (define (block? expression)
   (block-exp? expression))
-
+; Test
 (begin-for-test
   (check-true (literal? literal-100) "it should return true")
   (check-true (variable? variable-x15) "it should return true")
