@@ -693,6 +693,7 @@
 ; Returns: the numerical value of the expression 
 ; Examples: (call-value const-call) => 23
 ; (call-value (call (op "-") (list (lit 15) (lit 5)))) => 10
+; Strategy: cases on the operations
 (define (call-value call)
   (let ([op (operator-value (call-operator call))])
     (cond
