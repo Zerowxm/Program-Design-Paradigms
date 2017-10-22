@@ -710,7 +710,7 @@
 ; operator-value : OperationExpression -> String
 ; Given: an operation expression
 ; Returns: the name of the operation expression
-; Examples: check-equal? (operator-value op-addition) => "+"
+; Examples:(operator-value op-addition) => "+"
 ; (operator-value op-block) => "+"
 ; Strategy: cases on the type of operation expresssion
 (define (operator-value exp)
