@@ -462,13 +462,11 @@
 (define racket-at-10-10-1-1 (make-racket 10 10 1 1 false '(0 0 0 0)))
 (define racket-at-11-11-1-1 (make-racket 11 11 1 1 false '(0 0 0 0)))
 (define racket-at-10-10-0-0 (make-racket 10 10 0 0 false '(0 0 0 0)))
-(define world-to-end (make-world (make-balls 
-                                  ball-collide-back-wall empty)
+(define world-to-end (make-world empty
                                  racket-at-10-10-1-1 
                                  RALLY SPEED 0))
 
-(define world-after-end (make-world (make-balls
-                                     ball-after-end empty)
+(define world-after-end (make-world empty
                                     racket-at-10-10-0-0 
                                     PAUSE SPEED SPEED))
 (begin-for-test 

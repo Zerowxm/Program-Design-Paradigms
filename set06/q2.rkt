@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname q2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname q2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require rackunit)
 (require 2htdp/universe)
 (require 2htdp/image)
@@ -196,6 +196,7 @@
 
 ;; OBSERVER TEMPLATE:
 ;; bl-fn : BallList -> ??
+#;
 (define (bl-fn lst)
   (cond
     [(empty? lst) ...]
@@ -211,7 +212,7 @@
 ;          telling how many pixels it moves on each tick                                             
 ;          in the x and y directions, respectively.
 ; selected? : Boolean describes whether or not the racket is selected.
-; pos-mouse : List 4-elements list indicating the mouse position
+; pos-mouse : IntList 4-elements list indicating the mouse position
 ; and the difference between positions of racket and mouse
 ; first two elements are position of mouse and last two ones are difference 
 ; if mouse is not pressed default value is (0 0 0 0)
@@ -297,39 +298,50 @@
 
 ;; world-to-scene : World -> Scene
 ;; RETURNS: a Scene that portrays the given world.
-;; EXAMPLE: if world is pause, then everthing will be still and court becomes yellow
-;; and if world is rally, then the ball and the racket will move by the instructions
-;; STRATEGY: Cases on world state.
+;; EXAMPLE: ((world-to-scene world-initial) => image-serve
 (define (world-to-scene w)
   (if(string=? PAUSE (world-state w))
      (place-common-image w COURT-IMAGE-PAUSE)
      (rally-world-to-scene w)))
-
+; Test
+(begin-for-test
+  (check-equal? (world-to-scene world-initial)
+                image-serve "(world-to-scene world-initial) returns wrong image")
+  (check-equal? (world-to-scene pause-world) image-pause 
+                "(world-to-scene pause-world) returns wrong image"))
 ; balls-posn: BallList -> PosnList
 ; GIVEN: A list of ball
 ; RETURNS: a list of posn of ball in the given list
 ; Strategy: use observer template on BallList
 ; Examples: (balls-posn (list ball-at-20-20-0-0)) -> (list (make-posn 20 20))
+#;
 (define (balls-posn bl)
   (cond
     [(empty? bl) empty]
     [else (let ([b (first bl)])
             (cons (make-posn (ball-x b) (ball-y b)) (balls-posn (rest bl))))]))
-
-; place-common-image: World Image -> Image
-; Given: a world and an image
-; RETURNS: a image of world on the given image.
-; Strategy: use obverser template on BallList and World
+; Test
+#;
+(begin-for-test
+  (check-equal? (balls-posn (list ball-at-20-20-0-0)) (list (make-posn 20 20))))
+; place-common-image: World Scene -> Scene
+; Given: a world and an Scene
+; RETURNS: a Scene of world above the given scene.
+; Strategy: use HOF map on balls and use template of World 
+; Examples: (place-common-image  world-initial COURT-IMAGE) => image-serve
 (define (place-common-image w bg)
   (let ([bl (world-balls w)] [r (world-racket w)])
     (place-images
      (append
       (make-list (length bl) BALL-IMAGE)
       (list RACKET-IMAGE))
-     (append (balls-posn bl)
+     ; Ball -> Posn
+     ; Returns: the posn of the given ball
+     ; Examples ((lambda (b) (make-posn (ball-x b) (ball-y b)))
+     ; (list ball-at-20-20-0-0)) -> (list (make-posn 20 20))
+     (append (map (lambda (b) (make-posn (ball-x b) (ball-y b))) bl)
              (list (make-posn (racket-x r) (racket-y r))))
      bg)))
-
 ; Test data
 (define racket-selected
   (make-racket X-POS Y-POS 0 0 true (list X-POS Y-POS 0 0)))
@@ -358,8 +370,7 @@
 ;; rally-world-to-scene : World -> Scene
 ;; Given: A world
 ;; RETURNS: a Scene that portrays the given world.
-;; EXAMPLE: world becomes rally, then the ball and the racket will move
-;; by the instructions
+;; Examples: (world-to-scene world-initial) => image-serve
 ;; STRATEGY: use observer template on World and combine simpler functions
 (define (rally-world-to-scene w)
   (let ([r (world-racket w)])
@@ -385,10 +396,6 @@
                      (make-racket X-POS Y-POS 0 0  false '(0 0 0 0))
                      PAUSE SPEED SPEED))
 (begin-for-test
-  (check-equal? (world-to-scene world-initial)
-                image-serve "(world-to-scene world-initial) returns wrong image")
-  (check-equal? (world-to-scene pause-world) image-pause 
-                "(world-to-scene pause-world) returns wrong image")
   (check-equal? (rally-world-to-scene mouse-click-world) mouse-click-image 
                 "(rally-world-to-scene mouse-click-world) returns wrong image"))
  
@@ -431,6 +438,7 @@
 ;;; Examples: (world-ready-to-serve? world-initial) => true
 (define (world-ready-to-serve? w)
   (equal? READY-TO-SERVE (world-state w)))
+; Test
 (begin-for-test
   (check-equal? (world-ready-to-serve? world-initial) true
                 "return wrong infor the world should be ready"))
@@ -439,19 +447,20 @@
 ;;; GIVEN: any world that's possible for the simulation
 ;;; RETURNS: the world that should follow the given world
 ;;;     after a tick
-;;; Strategy: cases on world state if world is no longer in rally, treat it as
+;;; Strategy: use HOF filter on balls
 ;;; press space
 ;;; Examples: (world-after-tick world-to-end) => world-after-end
 ;;; (world-after-tick world-initial) => world-initial
 (define (world-after-tick w)
-  (let* ([bl (balls-collide-back-wall? (world-balls w))]
+  ; Ball -> Boolean
+  ; Returns: true if new y of the given ball is less than height of court
+  (let* ([bl (filter (lambda (b) (< (+ (ball-y b) (ball-vy b)) COURT-HEIGHT))
+   (world-balls w))]
     [w (make-world bl (world-racket w) (world-state w) (world-speed w)
       (world-pause-time w))])
-  (if (rally-end? w)
-      (press-space w)
+  (if (rally-end? w) (press-space w)
       (diff-world-state-after-tick w))))
 ; Tests
-; Test data
 (define racket-at-20-20-1-1 (make-racket 20 20 1 1 false '(0 0 0 0)))
 (define ball-collide-back-wall (make-ball 2 650 1 1))
 
@@ -462,13 +471,11 @@
 (define racket-at-10-10-1-1 (make-racket 10 10 1 1 false '(0 0 0 0)))
 (define racket-at-11-11-1-1 (make-racket 11 11 1 1 false '(0 0 0 0)))
 (define racket-at-10-10-0-0 (make-racket 10 10 0 0 false '(0 0 0 0)))
-(define world-to-end (make-world (make-balls 
-                                  ball-collide-back-wall empty)
+(define world-to-end (make-world empty
                                  racket-at-10-10-1-1 
                                  RALLY SPEED 0))
 
-(define world-after-end (make-world (make-balls
-                                     ball-after-end empty)
+(define world-after-end (make-world empty
                                     racket-at-10-10-0-0 
                                     PAUSE SPEED SPEED))
 (begin-for-test 
@@ -476,6 +483,25 @@
                 world-after-end "the world should be pause")
   (check-equal? (world-after-tick world-initial)
                 world-initial "the world should not be changed"))
+
+; balls-collide-back-wall?: BallList -> BallList
+; Given: a list balls of a world
+; Returns: a list like the given one except for the collided balls
+; Strategy: use observer template of BallList
+#;
+(define (balls-collide-back-wall? bl)
+  (cond
+    [(empty? bl) empty]
+    [else (let* ([b (first bl)] [y (+ (ball-y b) (ball-vy b))])
+            (if(> y COURT-HEIGHT)
+               (balls-collide-back-wall? (rest bl))
+               (cons b (balls-collide-back-wall? (rest bl)))))]))
+;Tests
+#;
+(begin-for-test
+  (check-equal? (balls-collide-back-wall? (world-balls rally-world)) 
+                (list (make-ball X-POS Y-POS VX-INITIAL VY-INITIAL))
+                "it should not collide"))
 
 ;;; diff-world-state-after-tick : World -> World
 ;;; GIVEN: any world that's possible for the simulation
@@ -516,8 +542,7 @@
 ; Examples:  (rally-end? world-to-end) => true
 (define (rally-end? w)
   (let ([bl (world-balls w)] [r (world-racket w)])
-    (if (equal? PAUSE (world-state w))
-        false
+    (and (equal? RALLY (world-state w))
         (or (racket-collide-top-wall? r)
             (empty?  bl)))))
 ; Tests
@@ -525,29 +550,12 @@
   (check-equal? (rally-end? world-to-end) true "the world should end")
   (check-equal? (rally-end? pause-world) false "the world should not end"))
 
-; balls-collide-back-wall?: BallList -> BallList
-; Given: a list balls of a world
-; Returns: a list like the given one except for the collided balls
-; Strategy: use observer template of BallList
-(define (balls-collide-back-wall? bl)
-  (cond
-    [(empty? bl) empty]
-    [else (let* ([b (first bl)] [y (+ (ball-y b) (ball-vy b))])
-            (if(> y COURT-HEIGHT)
-               (balls-collide-back-wall? (rest bl))
-               (cons b (balls-collide-back-wall? (rest bl)))))]))
-;Tests
-(begin-for-test
-  (check-equal? (balls-collide-back-wall? (world-balls rally-world)) 
-                (list (make-ball X-POS Y-POS VX-INITIAL VY-INITIAL))
-                "it should not collide"))
-
 ; rally-world-after-tick: World -> World
 ; Given: a world in rally state
 ; Returns: the world that should follow the given world after a tick 
 ; Stategy : use constructor template on World 
 ; and combine simpler functions 
-; E:(rally-world-after-tick rally-world) =>rally-world-1-tick
+; Examples:(rally-world-after-tick rally-world) =>rally-world-1-tick
 (define (rally-world-after-tick w)
   (make-world
    (balls-after-tick (world-balls w) (world-racket w))
