@@ -21,7 +21,7 @@
 ;;; Strategy: use HOF map on l1 and l2 followed by HOF foldr
 (define (inner-product l1 l2)
   ; Real Real -> Real
-  ; Given: two real
+  ; Given: two real numbersf
   ; Returns: the product of the two numbers
   ; Examples: ((lambda (e1 e2) (* e1 e2)) 1 2) => 2
   (foldr + 0 (map (lambda (e1 e2) (* e1 e2)) 
@@ -163,7 +163,9 @@
 ; (list 3 (list 1 (list 2)) (list 2 (list 1))))
 (define (first-element-permutation l)
   ; Int -> IntList
-  ; Returns: a list of x as first and the rest is l without x
+  ; Given: a int
+  ; Returns: a list of x as first and the rest is apply first-element-permutation 
+  ; on l without x 
   ; Examples: ((lambda (x) (cons x 
   ; (first-element-permutation (remove x (list 1 2 3))))) 3) => 
   ;(list 3 (list 1 (list 2)) (list 2 (list 1)))
@@ -192,6 +194,7 @@
     [(empty? sexp) (list l)]
     [(number? (first sexp)) (flatten (rest sexp) (cons (first sexp) l))]
     ; Sexp -> IntListList
+    ; Given: a sexp
     ; Returns: a list of intList by applying flatten on the given Sexp.
     ; Examples: ((lambda (x) (flatten x l)) (list 1)) -> (flatten empty l) -> (list l)
     [else (foldr append empty (map (lambda (x) (flatten x l)) sexp))]

@@ -337,6 +337,7 @@
       (make-list (length bl) BALL-IMAGE)
       (list RACKET-IMAGE))
      ; Ball -> Posn
+     ; Given: a ball
      ; Returns: the posn of the given ball
      ; Examples ((lambda (b) (make-posn (ball-x b) (ball-y b)))
      ; (list ball-at-20-20-0-0)) -> (list (make-posn 20 20))
@@ -446,12 +447,15 @@
 ;;; GIVEN: any world that's possible for the simulation
 ;;; RETURNS: the world that should follow the given world
 ;;;     after a tick
-;;; Strategy: use HOF filter on balls and template on world
+;;; Strategy: use HOF filter on balls and template of World
 ;;; Examples: (world-after-tick world-to-end) => world-after-end
 ;;; (world-after-tick world-initial) => world-initial
 (define (world-after-tick w)
   ; Ball -> Boolean
+  ; Given: a ball
   ; Returns: true if new y of the given ball is less than height of court
+  ; Examples: ((lambda (b) (< (+ (ball-y b) (ball-vy b)) COURT-HEIGHT)) 
+  ; ball-collide-back-wall) -> false
   (let ([w (make-world 
     (filter (lambda (b) (< (+ (ball-y b) (ball-vy b)) COURT-HEIGHT)) (world-balls w))
      (world-racket w) (world-state w) (world-speed w) (world-pause-time w))])
@@ -604,6 +608,7 @@
 ; Strategy: use HOF map on bl
 (define (balls-after-tick bl r)
   ; Ball -> Ball
+  ; Given: a ball
   ; Returns: return the ball like the given one after a tick
   (map (lambda (b) (if (ball-collide-racket? b r) (ball-collide-racket b (racket-vy r))
                                    (ball-next-motion b))) bl))
@@ -879,6 +884,7 @@
 ; Strategy: use HOF ormap on bl
 (define (balls-collide-racket? bl r)
   ; Ball  -> Boolean
+  ; Given: a ball
   ; Returns: true iff the given ball collide the racket.
   (ormap (lambda (b) (ball-collide-racket? b r)) bl))
 
