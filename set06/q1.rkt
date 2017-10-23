@@ -200,8 +200,11 @@
   (cond
     [(empty? l1) (list l2)]
     [(number? (first l1)) (flatten (rest l1) (cons (first l1) l2))]
-    [(empty? (rest l1)) (append (flatten (first l1) l2) empty)]
-    [else (append (flatten (first l1) l2) (flatten (rest l1) l2))]))
+    [else (foldr append empty (map (lambda (x) (flatten x l2)) l1))]
+    ;[(empty? (rest l1)) (append (flatten (first l1) l2) empty)]
+    ;[else (append (flatten (first l1) l2) (flatten (rest l1) l2))]
+    ))
+
 ; Test
 (begin-for-test 
   (check-equal? (flatten (first-element-permutation (list 1 2 3)) empty) 
