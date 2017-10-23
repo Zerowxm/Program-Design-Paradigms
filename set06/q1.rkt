@@ -18,7 +18,7 @@
 ;;;     (inner-product (list 2.5) (list 3.0))  =>  7.5
 ;;;     (inner-product (list 1 2 3 4) (list 5 6 7 8))  =>  70
 ;;;     (inner-product (list) (list))  =>  0
-;;; Strategy: use HOF map on l1 and l2 followed by HOF apply
+;;; Strategy: use HOF map on l1 and l2 followed by HOF foldr
 (define (inner-product l1 l2)
   ; Real Real -> Real
   ; Given: two real
@@ -31,6 +31,7 @@
   (if(empty? l1) 0
      (+ (* (first l1) (first l2)) 
         (inner-product (rest l1) (rest l2)))))
+; Test
 (begin-for-test
   (check-equal? (inner-product (list 2.5) (list 3.0)) 7.5
                 "the product should be 7.5")
@@ -52,18 +53,6 @@
 ;;;     (permutation-of? (list) (list)) => true
 (define (permutation-of? l1 l2)
   (equal? (sort l1 <) (sort l2 <)))
-
-; change-1st-to-end: IntList -> IntList
-; Given: a list of integers where the list at least contains two integers.
-; Returns: a list which is the same as the given list 
-; except that the first item is changed to the end of the list
-; Strategy: use observer template on IntList
-; Examples: (change-1st-to-end (list 1 2 3)) -> (list 2 3 1)
-(define (change-1st-to-end l)
-  (append (rest l) (list (first l))))
-(begin-for-test
-  (check-equal? (change-1st-to-end (list 1 2 3)) (list 2 3 1)
-                "it should be (list 2 3 1)"))
 
 ;;; shortlex-less-than? : IntList IntList -> Boolean
 ;;; GIVEN: two lists of integers
@@ -178,7 +167,8 @@
   ; Examples: ((lambda (x) (cons x 
   ; (first-element-permutation (remove x (list 1 2 3))))) 3) => 
   ;(list 3 (list 1 (list 2)) (list 2 (list 1)))
-  (map (lambda (x) (cons x  (first-element-permutation (remove x l)))) l))
+  (map (lambda (x) (cons x (first-element-permutation (remove x l)))) l))
+; Test
 (begin-for-test 
   (check-equal? (first-element-permutation (list 1 2 3))
     (list (list 1 (list 2 (list 3)) (list 3 (list 2))) 
@@ -190,19 +180,23 @@
 ; flatten: Sexp IntList -> IntListList
 ; Given: given a Sexp and a list of int
 ; Returns: a list of IntList
-; Strategy: use template of Sexp and SexpList
+; Strategy: use HOF map on l1 followed by append
+;           and use observer template of Sexp
 ; Examples:
 ; (flatten (list (list 1 (list 2 (list 3)) (list 3 (list 2))) 
 ; (list 2 (list 1 (list 3)) (list 3 (list 1))) 
 ; (list 3 (list 1 (list 2)) (list 2 (list 1)))) empty)
 ; => (list (list 3 2 1) (list 2 3 1) (list 3 1 2) (list 1 3 2) (list 2 1 3) (list 1 2 3))
-(define (flatten l1 l2)
+(define (flatten sexp l)
   (cond
-    [(empty? l1) (list l2)]
-    [(number? (first l1)) (flatten (rest l1) (cons (first l1) l2))]
-    [else (foldr append empty (map (lambda (x) (flatten x l2)) l1))]
-    ;[(empty? (rest l1)) (append (flatten (first l1) l2) empty)]
-    ;[else (append (flatten (first l1) l2) (flatten (rest l1) l2))]
+    [(empty? sexp) (list l)]
+    [(number? (first sexp)) (flatten (rest sexp) (cons (first sexp) l))]
+    ; Sexp -> IntListList
+    ; Returns: a list of intList by applying flatten on the given Sexp.
+    ; Examples: ((lambda (x) (flatten x l)) (list 1)) -> (flatten empty l) -> (list l)
+    [else (foldr append empty (map (lambda (x) (flatten x l)) sexp))]
+    ;[(empty? (rest sexp)) (append (flatten (first sexp) l) empty)]
+    ;[else (append (flatten (first sexp) l) (flatten (rest sexp) l))]
     ))
 
 ; Test
@@ -284,3 +278,17 @@
                  "it should be empty")
   (check-equal? (to-end (list (list 1) (list 2)) empty)
                 (arrangement (list 2) empty) ""))
+
+; change-1st-to-end: IntList -> IntList
+; Given: a list of integers where the list at least contains two integers.
+; Returns: a list which is the same as the given list 
+; except that the first item is changed to the end of the list
+; Strategy: use observer template on IntList
+; Examples: (change-1st-to-end (list 1 2 3)) -> (list 2 3 1)
+#;
+(define (change-1st-to-end l)
+  (append (rest l) (list (first l))))
+#;
+(begin-for-test
+  (check-equal? (change-1st-to-end (list 1 2 3)) (list 2 3 1)
+                "it should be (list 2 3 1)"))
