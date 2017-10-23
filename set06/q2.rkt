@@ -376,10 +376,8 @@
 (define (rally-world-to-scene w)
   (let ([r (world-racket w)])
     (if (racket-selected? r)
-        (place-image
-         MOUSE-CIRCLE
-         (list-ref (racket-pos-mouse r) 0)
-         (list-ref (racket-pos-mouse r) 1)
+        (place-image MOUSE-CIRCLE
+         (list-ref (racket-pos-mouse r) 0) (list-ref (racket-pos-mouse r) 1)
          (place-common-image w  COURT-IMAGE))
         (place-common-image w  COURT-IMAGE))))
 ; Tests
@@ -448,17 +446,15 @@
 ;;; GIVEN: any world that's possible for the simulation
 ;;; RETURNS: the world that should follow the given world
 ;;;     after a tick
-;;; Strategy: use HOF filter on balls
-;;; press space
+;;; Strategy: use HOF filter on balls and template on world
 ;;; Examples: (world-after-tick world-to-end) => world-after-end
 ;;; (world-after-tick world-initial) => world-initial
 (define (world-after-tick w)
   ; Ball -> Boolean
   ; Returns: true if new y of the given ball is less than height of court
-  (let* ([bl (filter (lambda (b) (< (+ (ball-y b) (ball-vy b)) COURT-HEIGHT))
-   (world-balls w))]
-    [w (make-world bl (world-racket w) (world-state w) (world-speed w)
-      (world-pause-time w))])
+  (let ([w (make-world 
+    (filter (lambda (b) (< (+ (ball-y b) (ball-vy b)) COURT-HEIGHT)) (world-balls w))
+     (world-racket w) (world-state w) (world-speed w) (world-pause-time w))])
   (if (rally-end? w) (press-space w)
       (diff-world-state-after-tick w))))
 ; Tests
@@ -609,8 +605,7 @@
 (define (balls-after-tick bl r)
   ; Ball -> Ball
   ; Returns: return the ball like the given one after a tick
-  (map (lambda (b) (if (ball-collide-racket? b r) 
-                    (ball-collide-racket b (racket-vy r))
+  (map (lambda (b) (if (ball-collide-racket? b r) (ball-collide-racket b (racket-vy r))
                                    (ball-next-motion b))) bl))
 ; Tests
 (define racket-at-80-80-0-5 (make-racket 80 80 0 -5 false '(0 0 0 0)))
@@ -883,6 +878,8 @@
 ; (balls-collide-racket? (make-balls (make-ball 24 300 3 9) empty) racket-24) => false
 ; Strategy: use HOF ormap on bl
 (define (balls-collide-racket? bl r)
+  ; Ball  -> Boolean
+  ; Returns: true iff the given ball collide the racket.
   (ormap (lambda (b) (ball-collide-racket? b r)) bl))
 
 #;(define (balls-collide-racket? bl r)
