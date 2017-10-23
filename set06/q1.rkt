@@ -53,6 +53,20 @@
 ;;;     (permutation-of? (list) (list)) => true
 (define (permutation-of? l1 l2)
   (equal? (sort l1 <) (sort l2 <)))
+; Test
+(begin-for-test
+  (check-equal?  (permutation-of? (list 1 2 3) (list 1 2 3)) true
+                 "it should be the permutation")
+  (check-equal?  (permutation-of? (list) (list 1 2 3)) false
+                 "it should be not the permutation")
+  (check-equal?  (permutation-of?  (list 3 1 2) (list 1 2 3)) true
+                 "it should be the permutation")
+  (check-equal?  (permutation-of?  (list 3 1 2) (list 1 2 4)) false
+                 "it should be not the permutation")
+  (check-equal?  (permutation-of? (list 1 2 3) (list 1 2)) false
+                 "it should not be the permutation")
+  (check-equal?  (permutation-of? (list) (list)) true
+                 "it should be the permutation"))
 
 ;;; shortlex-less-than? : IntList IntList -> Boolean
 ;;; GIVEN: two lists of integers
@@ -81,6 +95,7 @@
     [(= (first l1) (first l2))
      (shortlex-less-than? (rest l1) (rest l2))]
     [else false]))
+; Test
 (begin-for-test
   (check-equal?  (shortlex-less-than? (list) (list)) false
                  "it should return false")
