@@ -1,0 +1,26 @@
+TA-1 Name: Aashish
+TA-2 Name: Yasaman
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set06
+Question Codewalked: 1
+
+Design Grade: A
+Presentation Grade: A
+
+================
+
+Contract/Purpose Statement/Design Strategy:
+
+-- indent your code
+
+================
+
+
+Question Codewalked: 2
+
+Design Grade: A
+Presentation Grade: A
+
+================
