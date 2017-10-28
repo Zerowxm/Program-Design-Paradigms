@@ -5,24 +5,25 @@
 (require "extras.rkt")
 
 (provide 
-     lit 
-     literal-value
-     var 
-     variable-name
-     op 
-     operation-name
-     call 
-     call-operator
-     call-operands
-     block 
-     block-var
-     block-rhs
-     block-body
-     literal?
-     variable?
-     operation?
-     call?
-     block?)
+ lit 
+ literal-value
+ var 
+ variable-name
+ op 
+ operation-name
+ call 
+ call-operator
+ call-operands
+ block 
+ block-var
+ block-rhs
+ block-body
+ literal?
+ variable?
+ operation?
+ call?
+ block?
+ undefined-variables)
 (check-location "07" "q1.rkt")
 
 ; A Literal is represented as a struct (make-literal value)
@@ -130,10 +131,10 @@
 ;; elist-fn : ArithmeticExpressionList -> ??
 #;
 (define (elist-fn es)
-   (cond
-     [(empty? es) ...]
-     [else (... (first es))
-                (elist-fn (rest es))]))
+  (cond
+    [(empty? es) ...]
+    [else (... (first es))
+          (elist-fn (rest es))]))
 ;; Examples: (list (var 1) (op "+"))
 
 ;;;
@@ -355,71 +356,79 @@
 ; remove-duplicates: StringList -> StringList
 ; Given: a list of string
 ; Returns: a list like the given one except without repititions
-; Examples: (list "x" "v" "x" "v") => (list "x" "v") or (list "v" "x")
+; Examples: (remove-duplicates (list "x" "v" "x" "v")) => (list "x" "v") or (list "v" "x")
 ; Strategy: use observer template for StringList on l
 (define (remove-duplicates lon)
   (foldr (lambda (x y) (cons x (filter (lambda (z) (not (string=? x z))) y))) empty lon))
+; Test
+(begin-for-test
+  (check-equal? (remove-duplicates (list "x" "v" "x" "v")) (list "x" "v")))
 
-         ;;; undefined-variables : ArithmeticExpression -> StringList
-          ;;; GIVEN: an arbitrary arithmetic expression
-          ;;; RETURNS: a list of the names of all undefined variables
-          ;;;     for the expression, without repetitions, in any order
-          ;;; EXAMPLE:
-          ;;;     (undefined-variables
-          ;;;      (call (var "f")
-          ;;;            (list (block (var "x")
-          ;;;                         (var "x")
-          ;;;                         (var "x"))
-          ;;;                  (block (var "y")
-          ;;;                         (lit 7)
-          ;;;                         (var "y"))
-          ;;;                  (var "z"))))
-          ;;;  => some permutation of (list "f" "x" "z")
+;;; undefined-variables : ArithmeticExpression -> StringList
+;;; GIVEN: an arbitrary arithmetic expression
+;;; RETURNS: a list of the names of all undefined variables
+;;;     for the expression, without repetitions, in any order
+;;; EXAMPLE:
+;;;     (undefined-variables
+;;;      (call (var "f")
+;;;            (list (block (var "x")
+;;;                         (var "x")
+;;;                         (var "x"))
+;;;                  (block (var "y")
+;;;                         (lit 7)
+;;;                         (var "y"))
+;;;                  (var "z"))))
+;;;  => some permutation of (list "f" "x" "z")
+;;; Strategy: combine simpler functions
 
 (define (undefined-variables exp)
   (remove-duplicates (undefined-variables-in-exp exp empty empty)))
 ; Tests
 (begin-for-test
   (check-equal? (undefined-variables (call (var "f") 
-    (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
-      (var "z")))) (list "f" "x" "z")))
+                                           (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
+                                                 (var "z")))) (list "f" "x" "z")))
 
 ; undefined-variables-in-var: Variable StringList StringList -> StringList
-; Given: a variable var, a StringList s1 and a StringList s2
-; Returns: a list like s2 except including the name of var if it is not in s1 otherwise s2
+; Given: a variable var, a StringList defines and a StringList undefines
+; Returns: a list like undefines except including 
+; the name of var if it is not in defines
 ; Examples: (undefined-variables-in-var (var "x") (list "x") (list)) => empty
 ; (undefined-variables-in-var (var "x") (list) (list)) => (list "x")
 ; Strategy: cases on the name of the var
 (define (undefined-variables-in-var var defines undefines)
   (let ([var (variable-name var)])
     (if (member? var defines)
-    undefines
-    (cons var undefines))))
+        undefines
+        (cons var undefines))))
 ; Test
 (begin-for-test
   (check-equal? (undefined-variables-in-var (var "x") (list "x") (list)) empty
-    "it should return empty")
+                "it should return empty")
   (check-equal? (undefined-variables-in-var (var "x") (list) (list)) (list "x")
-    "it should return (list \"x\")"))
+                "it should return (list \"x\")"))
 
 ; undefined-variables-in-exp: ArithmeticExpression StringList StringList -> StringList
-; Given: an ArithmeticExpression exp a StringList s1 and a StringList s2
-; Returns: a list of string like s2 
+; Given: an ArithmeticExpression exp a StringList defines and a StringList undefines
+; Where: defines is a list of variable names available for exp, undefines is a list 
+; of variable names undefined for some larger expresssion's part. 
+; Returns: undefines appending a list of the names of undefined variables for exp
+; except which are in defines.
 ; Strategy: use observer template on ArithmeticExpression
-         ;;; EXAMPLE:
-          ;;;     (undefined-variables-in-exp
-          ;;;      (call (var "f")
-          ;;;            (list (block (var "x")
-          ;;;                         (var "x")
-          ;;;                         (var "x"))
-          ;;;                  (block (var "y")
-          ;;;                         (lit 7)
-          ;;;                         (var "y"))
-          ;;;                  (var "z"))) empty empty)
-          ;;;  => some permutation of (list "f" "x" "z")
-          ; (undefined-variables-in-exp (var "x") (list "x") (list)) => empty
-          ; (undefined-variables-in-exp (block (var "x") (var "x") (var "x")) empty empty) 
-          ; => (list "x")
+;;; EXAMPLE:
+;;;     (undefined-variables-in-exp
+;;;      (call (var "f")
+;;;            (list (block (var "x")
+;;;                         (var "x")
+;;;                         (var "x"))
+;;;                  (block (var "y")
+;;;                         (lit 7)
+;;;                         (var "y"))
+;;;                  (var "z"))) empty empty)
+;;;  => some permutation of (list "f" "x" "z")
+; (undefined-variables-in-exp (var "x") (list "x") (list)) => empty
+; (undefined-variables-in-exp (block (var "x") (var "x") (var "x")) empty empty) 
+; => (list "x")
 (define (undefined-variables-in-exp exp defines undefines)
   (cond
     [(variable? exp) (undefined-variables-in-var exp defines undefines)]
@@ -429,66 +438,78 @@
 ; Test
 (begin-for-test
   (check-equal? 
-    (undefined-variables-in-exp (block (var "x") (var "x") (var "x")) empty empty)
-    (list "x") "it should return (list \"x\")")
+   (undefined-variables-in-exp (block (var "x") (var "x") (var "x")) empty empty)
+   (list "x") "it should return (list \"x\")")
   (check-equal? (undefined-variables-in-exp (var "x") (list "x") (list)) empty
-    "it should return empty")
+                "it should return empty")
   (check-equal? (undefined-variables-in-exp (call (var "f") 
-    (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
-      (var "z"))) empty empty) (list "f" "x" "z") "it returns a wrong list"))
+                                                  (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
+                                                        (var "z"))) empty empty) (list "f" "x" "z") "it returns a wrong list"))
 
 ; undefined-variables-in-call: Call StringList StringList -> StringList
-; Given: a Call c a StringList s1 and a StringList s2
-; Returns: a list of string like s2 plus all the names of variable in c that are not in s1
-; as well as not defined by block in call
-         ;;; EXAMPLE:
-          ;;;     (undefined-variables-in-call
-          ;;;      (call (var "f")
-          ;;;            (list (block (var "x")
-          ;;;                         (var "x")
-          ;;;                         (var "x"))
-          ;;;                  (block (var "y")
-          ;;;                         (lit 7)
-          ;;;                         (var "y"))
-          ;;;                  (var "z"))) empty empty)
-          ;;;  => some permutation of (list "f" "x" "z")
+; Given: a Call c a StringList defines and a StringList undefines
+; Where: defines is a list of variable names available for c, undefines is a list 
+; of variable names undefined in some larger expresssion's part. 
+; Returns: a list of variable names like undefines 
+; appending a list of the names of undefined variables for c 
+; except which are in defines. 
+; Strategy: use observer template of Call on call
+;;; EXAMPLE:
+;;;     (undefined-variables-in-call
+;;;      (call (var "f")
+;;;            (list (block (var "x")
+;;;                         (var "x")
+;;;                         (var "x"))
+;;;                  (block (var "y")
+;;;                         (lit 7)
+;;;                         (var "y"))
+;;;                  (var "z"))) empty empty)
+;;;  => some permutation of (list "f" "x" "z")
 (define (undefined-variables-in-call call defines undefines)
   (append 
-      (undefined-variables-in-exp (call-operator call) defines undefines) 
-      (undefined-variables-in-list (call-operands call) defines undefines)))
+   (undefined-variables-in-exp (call-operator call) defines undefines) 
+   (undefined-variables-in-list (call-operands call) defines undefines)))
 ; Tests
 (begin-for-test
   (check-equal? (undefined-variables-in-call (call (var "f") 
-    (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
-      (var "z"))) empty empty) (list "f" "x" "z")))
+                                                   (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
+                                                         (var "z"))) empty empty) (list "f" "x" "z")))
 
 ; undefined-variables-in-block Block StringList StringList -> StringList
-; Given: a Block block a StringList s1 and a StringList s2
-; Returns: 
+; Given: a Block block a StringList defines and a StringList undefines
+; Where: defines is a list of variable names available for block, undefines is a list 
+; of variable names undefined in some larger expresssion's part. 
+; Returns: undefines appending a list of the names of undefined variables for block 
+; except which are in defines. 
+; Strategy: use observer template of Block on block
 ; Examples: (undefined-variables-in-block (block (var "x") (var "x") (var "x")) empty empty) 
-          ; => (list "x")
+; => (list "x")
 (define (undefined-variables-in-block block defines undefines)
- (append
-      (undefined-variables-in-exp (block-rhs block) defines undefines)
-      (undefined-variables-in-exp (block-body block) 
-        (cons (variable-name (block-var block)) defines) undefines)))
- ; Test
+  (append
+   (undefined-variables-in-exp (block-rhs block) defines undefines)
+   (undefined-variables-in-exp (block-body block) 
+                               (cons (variable-name (block-var block)) defines) undefines)))
+; Test
 (begin-for-test
   (check-equal? 
-    (undefined-variables-in-block (block (var "x") (var "x") (var "x")) empty empty)
-    (list "x") "it should return (list \"x\")")) 
+   (undefined-variables-in-block (block (var "x") (var "x") (var "x")) empty empty)
+   (list "x") "it should return (list \"x\")")) 
 
 ; undefined-variables-in-list: ArithmeticExpressionList StringList StringList -> StringList
-; Given: a ArithmeticExpressionList exps a StringList s1 and a StringList s2
+; Given: a ArithmeticExpressionList exps a StringList defines and a StringList undefines
+; Where: defines is a list of variable names available for all exp in exps,
+; undefines is a list of variable names undefined in some larger expresssion's part. 
+; Returns: undefines appending a list of the names of undefined variables for all exps
+; except which are in defines. 
 ; Strategy: use HOF map on exps followed by apply
 ; Examples:(undefined-variables-in-list 
 ;     (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
 ;       (var "z")) empty empty) => '("x" "z")
 (define (undefined-variables-in-list exps defines undefines)
   (apply 
-    append (map (lambda (x) (undefined-variables-in-exp x defines undefines)) exps)))
+   append (map (lambda (x) (undefined-variables-in-exp x defines undefines)) exps)))
 ; Test
 (begin-for-test 
   (check-equal? (undefined-variables-in-list 
-    (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
-      (var "z")) empty empty) (list"x" "z") "it should return '(\"x\" \"z\")"))
+                 (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
+                       (var "z")) empty empty) (list"x" "z") "it should return '(\"x\" \"z\")"))
