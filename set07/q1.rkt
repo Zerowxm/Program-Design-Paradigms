@@ -362,12 +362,13 @@
   ; String StringList -> StringList
   ; Returns: cons the given string to the given stringlist
   (foldr (lambda (x y) (cons x (filter 
-    ; String -> Boolean
-    ; Returns: true if the given string is equal to x
-    (lambda (z) (not (string=? x z))) y))) empty st))
+                                ; String -> Boolean
+                                ; Returns: true if the given string is equal to x
+                                (lambda (z) (not (string=? x z))) y))) empty st))
 ; Test
 (begin-for-test
-  (check-equal? (remove-duplicates (list "x" "v" "x" "v")) (list "x" "v")))
+  (check-equal? (remove-duplicates (list "x" "v" "x" "v")) (list "x" "v")
+    "it should return (list \"x\" \"v\")"))
 
 ;;; undefined-variables : ArithmeticExpression -> StringList
 ;;; GIVEN: an arbitrary arithmetic expression
@@ -390,7 +391,8 @@
 ; Tests
 (begin-for-test
   (check-equal? (undefined-variables (call (var "f") 
-                                           (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
+                                           (list (block (var "x") (var "x") (var "x"))
+                                                 (block (var "y") (lit 7) (var "y"))
                                                  (var "z")))) (list "f" "x" "z")))
 
 ; undefined-variables-in-exp: ArithmeticExpression StringList StringList -> StringList
@@ -428,8 +430,12 @@
   (check-equal? (undefined-variables-in-exp (var "x") (list "x") (list)) empty
                 "it should return empty")
   (check-equal? (undefined-variables-in-exp (call (var "f") 
-                                                  (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
-                                                        (var "z"))) empty empty) (list "f" "x" "z") "it returns a wrong list"))
+                                                  (list
+                                                   (block (var "x") (var "x") (var "x"))
+                                                   (block (var "y") (lit 7) (var "y"))
+                                                        (var "z")))
+                                            empty empty) (list "f" "x" "z")
+                                                         "it returns a wrong list"))
 
 ; undefined-variables-in-var: Variable StringList StringList -> StringList
 ; Given: a variable var, a StringList defines and a StringList undefines
@@ -476,8 +482,11 @@
 ; Tests
 (begin-for-test
   (check-equal? (undefined-variables-in-call (call (var "f") 
-                                                   (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
-                                                         (var "z"))) empty empty) (list "f" "x" "z")))
+                                                   (list
+                                                    (block (var "x") (var "x") (var "x"))
+                                                    (block (var "y") (lit 7) (var "y"))
+                                                    (var "z")))
+                                             empty empty) (list "f" "x" "z")))
 
 ; undefined-variables-in-block: Block StringList StringList -> StringList
 ; Given: a Block block a StringList defines and a StringList undefines
@@ -486,36 +495,41 @@
 ; Returns: undefines appending a list of the names of undefined variables for block 
 ; except which are in defines. 
 ; Strategy: use observer template of Block on block
-; Examples: (undefined-variables-in-block (block (var "x") (var "x") (var "x")) empty empty) 
-; => (list "x")
+; Examples: (undefined-variables-in-block (block (var "x") (var "x") (var "x"))
+; empty empty) => (list "x")
 (define (undefined-variables-in-block block defines undefines)
   (append
    (undefined-variables-in-exp (block-rhs block) defines undefines)
    (undefined-variables-in-exp (block-body block) 
-                               (cons (variable-name (block-var block)) defines) undefines)))
+                               (cons (variable-name (block-var block))
+                                     defines) undefines)))
 ; Test
 (begin-for-test
   (check-equal? 
    (undefined-variables-in-block (block (var "x") (var "x") (var "x")) empty empty)
    (list "x") "it should return (list \"x\")")) 
 
-; undefined-variables-in-list: ArithmeticExpressionList StringList StringList -> StringList
-; Given: a ArithmeticExpressionList exps a StringList defines and a StringList undefines
+; undefined-variables-in-list:
+; ArithmeticExpressionList StringList StringList -> StringList
+; Given: a ArithmeticExpressionList exps and
+; a StringList defines and a StringList undefines
 ; Where: defines is a list of variable names available for all exp in exps,
 ; undefines is a list of variable names undefined in some larger expresssion's part. 
-; Returns: undefines appending a list of the names of undefined variables for all exps
-; except which are in defines. 
+; Returns: undefines appending a list of the names of undefined variables
+; for all exps except which are in defines. 
 ; Strategy: use HOF map on exps followed by apply
 ; Examples:(undefined-variables-in-list 
 ;     (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
 ;       (var "z")) empty empty) => '("x" "z")
 (define (undefined-variables-in-list exps defines undefines)
   (apply 
-    ; ArithmeticExpression -> StringList
-    ; Returns: a list of all variables name undefined in the given expresssion
+   ; ArithmeticExpression -> StringList
+   ; Returns: a list of all variables name undefined in the given expresssion
    append (map (lambda (x) (undefined-variables-in-exp x defines undefines)) exps)))
 ; Test
 (begin-for-test 
   (check-equal? (undefined-variables-in-list 
-                 (list (block (var "x") (var "x") (var "x")) (block (var "y") (lit 7) (var "y"))
-                       (var "z")) empty empty) (list"x" "z") "it should return '(\"x\" \"z\")"))
+                 (list (block (var "x") (var "x") (var "x"))
+                       (block (var "y") (lit 7) (var "y"))
+                       (var "z")) empty empty) (list"x" "z")
+                                               "it should return '(\"x\" \"z\")"))

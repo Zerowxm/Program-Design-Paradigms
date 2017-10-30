@@ -89,36 +89,39 @@
       false))
 ; Test
 (begin-for-test
-  (check-equal? (well-typed? (lit 17)) true)
-  (check-equal? (well-typed? (var "x")) false)
+  (check-equal? (well-typed? (lit 17)) true "it should return true")
+  (check-equal? (well-typed? (var "x")) false "it should return false")
   (check-equal? (well-typed?
                  (block (var "f")
                         (op "+")
                         (block (var "x")
                                (call (var "f") (list))
                                (call (op "*")
-                                     (list (var "x")))))) true)
+                                     (list (var "x")))))) true "it should return true")
   (check-equal? (well-typed?
                  (block (var "f")
                         (op "+")
                         (block (var "f")
                                (call (var "f") (list))
                                (call (op "*")
-                                     (list (var "f")))))) true)
+                                     (list (var "f")))))) true
+                                                          "it should return true")
   (check-equal? (well-typed?
                  (block (var "f")
                         (op "+")
                         (block (var "x")
                                (call (var "f") (list))
                                (call (op "*")
-                                     (list (var "f")))))) false)
+                                     (list (var "f")))))) false
+                                                          "it should return false")
   (check-equal? (well-typed?
                  (block (var "f")
                         (op "-")
                         (block (var "x")
                                (call (var "f") (list))
                                (call (op "/")
-                                     (list (var "f")))))) false))
+                                     (list (var "f")))))) false
+                                                          "it should return false"))
 
 ; type-of-exp: ArithmeticExpression VarTypes -> Type
 ; GIVEN: a ArithmeticExpression exp and a VarTypes var-types
@@ -138,8 +141,8 @@
     [(variable? exp) (list-ref var-types (add1 (index-of exp var-types)))]))
 ; Test
 (begin-for-test
-  (check-equal? (type-of-exp (lit 5) empty) "Int")
-  (check-equal? (type-of-exp (op "+") empty) "Op0"))
+  (check-equal? (type-of-exp (lit 5) empty) "Int" "it should return Int")
+  (check-equal? (type-of-exp (op "+") empty) "Op0" "it should return Op0"))
 
 ; type-of-call: Call VarTypes -> Type
 ; GIVEN: a Call c and a VarTypes var-types
@@ -194,8 +197,8 @@
   ; String -> Boolean
   ; Returns ture if t is equal to "Int"
   (andmap (lambda (t) (equal? "Int" t))
-  ; ArithmeticExpression -> Type
-  ; Returns: the type of the given expression 
+          ; ArithmeticExpression -> Type
+          ; Returns: the type of the given expression 
           (map (lambda (x) (type-of-exp x var-types)) exps)))
 ; Test
 (begin-for-test
@@ -227,8 +230,9 @@
                                        (block (var "x")
                                               (call (var "f") (list))
                                               (call (op "*")
-                                                    (list (var "x"))))) empty) "Int"
-  "it should return Int"))
+                                                    (list (var "x")))))
+                                empty) "Int"
+                                       "it should return Int"))
 
 ; types-update: Block VarTypes -> VarTypes
 ; GIVEN: a Block b and a VarTypes var-types
@@ -251,6 +255,7 @@
     ; Given: a VarTypes lst
     ; Returns: a list like 1st except with updating 
     ; the the type of the var defined by b or adding them at the end
+    ; Strategy: recur on (rest (rest lst))
     (local [(define (helper lst)
               (cond
                 [(empty? lst) (list var type)]
@@ -269,7 +274,7 @@
                                                   (list (var "x"))))) empty)
                 (list (var "f") "Op0")
                                                                             
-                                          "it returns wrong"))
+                "it returns wrong"))
 
 ; index-of: X XList -> Integer
 ; GIVEN: a x which is any type and a list of x
@@ -278,6 +283,11 @@
 ; Strategy: use observer template on XList
 ; EXAMPLES: (index-of 1 (list 1 2)) => 0
 (define (index-of x l)
+  ; XList Integer -> Integer
+  ; Given: a XList lst and a Integer counter
+  ; Where: lst is not empty and contains x
+  ; Returns: the index of x in lst
+  ; Strategy: use observer template on XList
   (local [(define (helper lst counter)
             (cond 
               [(equal? x (first lst)) counter]
@@ -285,7 +295,7 @@
     (helper l 0)))
 ; Test
 (begin-for-test
-  (check-equal? (index-of 1 (list 1 2)) 0))
+  (check-equal? (index-of 1 (list 1 2)) 0 "it should return 0"))
 
 ; type-of-op: Operation -> Type
 ; GIVEN: a Operation op 
