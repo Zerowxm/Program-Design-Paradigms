@@ -4,7 +4,7 @@
 (require rackunit)
 (require "extras.rkt")
 (require "q1.rkt")
-
+(require "common.rkt")
 (provide
  tie
  defeated
@@ -14,13 +14,16 @@
  power-ranking)
 (check-location "08" "q2.rkt")
 
-; A OutcomeResult is the result of a competitor in all outcomes represented
+; A OutcomeResult is the result of a competitor's all outcomes represented
 ; as a struct (make-outcome-r comparator outranks outranked percentage)
-; -competitor Competitor   the owner of this outcome result
-; -outranks NonNegInteger  indicates the number of competitors outranked by the owner
-; -outranked NonNegInteger indicates the number of competitors that outrank the owner
-; -percentage NonNegReal   the number of outcomes in which the owner defeats or ties 
-;    another competitor divided by the number of outcomes that mention the owner. 
+; -competitor Competitor   the owner of this outcomes result
+; -outranks NonNegInteger  indicates the number of competitors
+; outranked by the owner
+; -outranked NonNegInteger indicates the number of competitors
+; that outrank the owner
+; -percentage NonNegReal   the number of outcomes in which
+; the owner defeats or ties another competitor
+; divided by the number of outcomes that mention the owner. 
 (define-struct outcome-r (competitor outranks outranked percentage))
 ; CONSTRUCTOR TEMPLATE
 ; (make-outcome-r Competitor NonNegInteger NonNegInteger NonNegReal)
@@ -36,14 +39,6 @@
 ; -empty
 ; -(cons r rslt)
 ; WHERE: r is OutcomeResult, rslt is OutcomeResultList
-; OBSERVER TEMPLATE
-#;
-(define (rslt-fn rslt)
-  (cond
-    [(empty? rslt) ...]
-    [else (outcome-r-fn (first rslt)
-                        (rslt-fn (rest rslt)))]))
-
 (define results (list
                  (make-outcome-r "A" 3 0 1)
                  (make-outcome-r "D" 2 4 1/2)
@@ -69,14 +64,14 @@
 
 (define competitors (list "A" "D" "E" "C" "B" "F"))
 
-; A Comparator is a function represented as (OutcomeResult OutcomeResult -> Boolean)
+; A Comparator is a function represented as
+; (OutcomeResult OutcomeResult -> Boolean)
 ; accepting two arguements of OutcomeResult and returning Boolean
 
 ; A ComparatorList is a one of
 ; -empty
 ; -(cons comparator competitors)
-; WHERE: comparator is a Comparator
-; competitors is ComparatorList
+; WHERE: comparator is a Comparator and competitors is ComparatorList
 
 ;;; power-ranking : OutcomeList -> CompetitorList
 ;;; GIVEN: a list of outcomes
@@ -118,13 +113,13 @@
 ; (make-outcome-r "B" 2 4 1/2)
 ; (make-outcome-r "D" 2 4 1/2))
 (define (sort-of-result rslt)
-	; OutcomeResultList ComparatorList -> OutcomeResultList
-	; GIVEN: a OutcomeResultList rslt and a ComparatorList cplst
-	; WHERE: cplst is a list of functions passed to sort as the comparator
-	; to sort rslt
-	; RETURNS: a list like rslt except it is sorted by cplst 
-	; Strategy: use observer template of ComparatorList
-	; Halting Measure: the length of cplst
+  ; OutcomeResultList ComparatorList -> OutcomeResultList
+  ; GIVEN: a OutcomeResultList rslt and a ComparatorList cplst
+  ; WHERE: cplst is a list of functions passed to sort as the comparator
+  ; to sort rslt
+  ; RETURNS: a list like rslt except it is sorted by cplst 
+  ; Strategy: use observer template of ComparatorList
+  ; Halting Measure: the length of cplst
   (local [(define (helper rslt cplst)
             (cond
               [(empty? cplst) rslt]
@@ -173,7 +168,7 @@
                                     [(defeat? o) 
                                      (list (defeat-winner o) (defeat-loser o))]
                                     [(tie? o) 
-                                    (tie-t-competitors o)])) 
+                                     (tie-t-competitors o)])) 
                       olst))))
 ; Test
 (begin-for-test
@@ -240,8 +235,8 @@
 ; Test
 (begin-for-test
   (check-equal? (outranked-less-than? (make-outcome-r "B" 2 4 1/2)
-                                      (make-outcome-r "D" 2 4 1/2)) false
-  "it should return false"))
+                                      (make-outcome-r "D" 2 4 1/2))
+                false "it should return false"))
 
 ; outranks-more-than?: OutcomeResult OutcomeResult -> Boolean
 ; GIVEN: two OutcomeResult r1 and r2
@@ -256,8 +251,8 @@
 ; Test
 (begin-for-test
   (check-equal? (outranks-more-than? (make-outcome-r "B" 2 4 1/2)
-                                     (make-outcome-r "D" 2 4 1/2)) false
-  "it should return false"))
+                                     (make-outcome-r "D" 2 4 1/2))
+                false "it should return false"))
 
 ; percentage-more-than?: OutcomeResult OutcomeResult -> Boolean
 ; GIVEN: two OutcomeResult r1 and r2
@@ -273,8 +268,8 @@
 ; Test
 (begin-for-test
   (check-equal? (percentage-more-than? (make-outcome-r "B" 2 4 1/2)
-                                       (make-outcome-r "D" 2 4 1/2)) false
-  "it should return false"))
+                                       (make-outcome-r "D" 2 4 1/2))
+                false "it should return false"))
 
 ; string-less-than?: OutcomeResult OutcomeResult -> Boolean
 ; GIVEN: two OutcomeResult r1 and r2
@@ -292,4 +287,4 @@
 (begin-for-test
   (check-true (string-less-than? (make-outcome-r "B" 2 4 1/2)
                                  (make-outcome-r "D" 2 4 1/2))
-  "it should return true"))
+              "it should return true"))
