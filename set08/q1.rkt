@@ -24,6 +24,7 @@
 (define C "C")
 (define OF #f)
 (define BY #t)
+
 ; A Tie represents a tie (draw) between two competitors  
 ; as a struct (make tie-t competitors)
 ; -competitors CompetitorList WHERE it must just have two elements
@@ -210,20 +211,7 @@
 ;;;  => (list "B" "C")
 ;;; Strategy: call general functions
 (define (outranks c olst)
-  (outranks-or-outranked c olst OUTRANKS))
-#;
-(define (outranks c olst)
-  (let ([outranked (defeated-and-tied-of c olst)])
-    (sort
-     (remove-duplicates
-      (append outranked
-              (apply append
-                     (map 
-                      ; Competitor -> CompetitorList
-                      ; RETURNS: a list of the competitors outranked
-                      ; by the given competitor
-                      (lambda (c) (defeated-and-tied-of c olst)) outranked))))
-     string<?)))
+  (sort (remove-duplicates (outranks-or-outranked c olst OUTRANKS)) string<?))
 ; Test
 (begin-for-test
   (check-equal? (outranks "A" (list (defeated "A" "B") (tie "B" "C")))
@@ -231,7 +219,13 @@
   (check-equal? (outranks "B" (list (defeated "A" "B") (defeated "B" "A")))
                 (list "A" "B") "it returns wrong")
   (check-equal? (outranks "C" (list (defeated "A" "B") (tie "B" "C")))
-                (list "B" "C") "it returns wrong"))
+                (list "B" "C") "it returns wrong")
+   (check-equal? (outranks "C" (list (tie "B" "C") (defeated "A" "B")))
+                (list "B" "C") "it returns wrong")
+   (check-equal? (outranks "A" (list (defeated "A" "B") (tie "B" "C") (tie "C" "E")))
+    (list "B" "C" "E"))
+   (check-equal? (outranks "A" (list (defeated "A" "B") (defeated "B" "C") 
+    (defeated"C" "E"))) (list "B" "C" "E")))
 
 ;;; outranked-by : Competitor OutcomeList -> CompetitorList
 ;;; GIVEN: the name of a competitor and a list of outcomes
@@ -249,7 +243,7 @@
 ;;;  => (list "A" "B" "C")
 ; Strategy: call general functions
 (define (outranked-by c olst)
-  (outranks-or-outranked c olst OUTRANKED))
+  (sort (remove-duplicates (outranks-or-outranked c olst OUTRANKED)) string<?))
 ; Test
 (begin-for-test
   (check-equal? (outranked-by "A" (list (defeated "A" "B") (tie "B" "C")))
@@ -269,6 +263,22 @@
 ;;;     (outranks-or-outranked "A" (list (defeated "A" "B") (tie "B" "C")) #t)
 ;;;  => (list)
 ; Strategy: use HOF map on OutcomeList followed by apply
+(define (outranks-or-outranked c olst outranked?)
+  (let* ([outrank (if (equal? true outranked?) 
+                      defeated-and-tied-by 
+                      defeated-and-tied-of)]
+         [outranked (outrank c olst)])
+  (local [(define (helper competitors outranked)
+            (let ([competitors (filter (lambda (x) (not (member? x outranked)))
+              ; Competitor -> CompetitorList
+              ; RETURNS: a list of the competitors outranked by c
+             (apply append (map (lambda (c) (outrank c olst)) competitors)))]
+            [outranked (append outranked competitors)])
+              (cond
+                [(empty? competitors) outranked]
+                [else (helper competitors outranked)])))]
+  (helper outranked outranked))))
+#;
 (define (outranks-or-outranked c olst outranked?)
   (let* ([outrank (if (equal? true outranked?) 
                       defeated-and-tied-by 
@@ -309,8 +319,8 @@
                      olst)))
 ; Test
 (begin-for-test
-  (check-equal? (outranks "A" (list (defeated "A" "B") (tie "B" "C")))
-                (list "B" "C") "it returns wrong"))
+  (check-equal? (defeated-and-tied-of "A" (list (defeated "A" "B") (tie "B" "C")))
+                (list "B") "it returns wrong"))
 
 ; defeated-and-tied-by: Competitor OutcomeList -> CompetitorList
 ; GIVEN: a Competitor c and OutcomeList olst
