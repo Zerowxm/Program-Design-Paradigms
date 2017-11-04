@@ -3,14 +3,27 @@
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname q1) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require rackunit)
 (require "extras.rkt")
-
+(provide
+  tie
+  defeated
+  defeated?
+  outranks
+  outranked-by
+  defeat-winner
+  defeat-loser
+  tie?
+  defeat?
+  remove-duplicates
+  tie-t-competitors
+  member-in-tie?)
 (check-location "08" "q1.rkt")
 
 ; A Competitor is represented as a String (any string will do).
 (define A "A")
 (define B "B")
 (define C "C")
-
+(define OF #f)
+(define BY #t)
 ; A Tie represents a tie (draw) between two competitors  
 ; as a struct (make tie-t competitors)
 ; -competitors CompetitorList WHERE it must just have two elements
@@ -164,7 +177,8 @@
 ; remove-duplicates: XList -> XList
 ; Given: a list of X which is any type
 ; Returns: a list like the given one except without repititions
-; Examples: (remove-duplicates (list "x" "v" "x" "v")) => (list "x" "v") or (list "v" "x")
+; Examples: (remove-duplicates (list "x" "v" "x" "v"))
+; => (list "x" "v") or (list "v" "x")
 ; Strategy: use HOF filter on XList followed by folder
 (define (remove-duplicates st)
   ; String XList -> XList
@@ -254,7 +268,7 @@
 ;;; EXAMPLES:
 ;;;     (outranks-or-outranked "A" (list (defeated "A" "B") (tie "B" "C")) #t)
 ;;;  => (list)
-; Strategy: use HOF map on OutcomtList followed by apply
+; Strategy: use HOF map on OutcomeList followed by apply
 (define (outranks-or-outranked c olst outranked?)
   (let* ([outrank (if (equal? true outranked?) 
                       defeated-and-tied-by 
@@ -273,8 +287,6 @@
   (check-equal? (outranks-or-outranked "A" (list (defeated "A" "B") (tie "B" "C")) #t)
                 (list) "it returns wrong"))
 
-(define OF #f)
-(define BY #t)
 ; defeated-and-tied-of: Competitor OutcomeList -> CompetitorList
 ; GIVEN: a Competitor c and OutcomeList olst
 ; RETURNS: a list of the competitors outranked by the given competitor c
