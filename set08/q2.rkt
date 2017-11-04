@@ -69,18 +69,14 @@
 
 (define competitors (list "A" "D" "E" "C" "B" "F"))
 
+; A Comparator is a function represented as (OutcomeResult OutcomeResult -> Boolean)
+; accepting two arguements of OutcomeResult and returning Boolean
+
 ; A ComparatorList is a one of
 ; -empty
 ; -(cons comparator competitors)
-; WHERE: comparator is a function as (X X -> Boolean) 
+; WHERE: comparator is a Comparator
 ; competitors is ComparatorList
-; OBSERVER TEMPLATE
-#;
-(define (cplst-fn comparators)
-	(cond
-		[(empty? comparators) ...]
-		[else ... (first comparators) 
-		(cplst-fn (rest comparators))]))
 
 ;;; power-ranking : OutcomeList -> CompetitorList
 ;;; GIVEN: a list of outcomes
@@ -123,16 +119,16 @@
 ; (make-outcome-r "D" 2 4 1/2))
 (define (sort-of-result rslt)
 	; OutcomeResultList ComparatorList -> OutcomeResultList
-	; GIVEN: a OutcomeResultList rslt and a ComparatorList comparators
-	; WHERE: comparators is a list of functions passed to sort as the comparator
+	; GIVEN: a OutcomeResultList rslt and a ComparatorList cplst
+	; WHERE: cplst is a list of functions passed to sort as the comparator
 	; to sort rslt
-	; RETURNS: a list like rslt except it is sorted by comparators 
+	; RETURNS: a list like rslt except it is sorted by cplst 
 	; Strategy: use observer template of ComparatorList
-	; Halting Measure: the length of comparators
-  (local [(define (helper rslt comparators)
+	; Halting Measure: the length of cplst
+  (local [(define (helper rslt cplst)
             (cond
-              [(empty? comparators) rslt]
-              [else (helper (sort rslt (first comparators)) (rest comparators))]))]
+              [(empty? cplst) rslt]
+              [else (helper (sort rslt (first cplst)) (rest cplst))]))]
     (helper rslt (list outranked-less-than? outranks-more-than?
                        percentage-more-than? string-less-than?))))
 ; Test
@@ -158,7 +154,7 @@
     (map (lambda (c) (make-outcome-r c 
                                      (length (outranks c olst)) 
                                      (length (outranked-by c olst))
-                                     (no-losing-percentage c olst clst)))
+                                     (no-losing-percentage c olst)))
          clst)))
 ; Test
 (begin-for-test
@@ -198,18 +194,17 @@
 (begin-for-test
   (check-true (mentions? "A" (tie "A" "B")) "it shou return true"))
 
-; no-losing-percentage: Competitor OutcomeList CompetitorList -> NonNegReal
-; GIVEN: a Competitor c an OutcomeList olst and a CompetitorList clst
+; no-losing-percentage: Competitor OutcomeList -> NonNegReal
+; GIVEN: a Competitor c an OutcomeList olst 
 ; RETURNS: the number of outcomes in which c defeats or ties another competitor
 ; divided by the number of outcomes that mention c
-; Strategy: use HOF filter on clst and olst
+; Strategy: use HOF filter and olst
 ; EXAMPLES: (no-losing-percentage "D" outcomes competitors) => 1/2 
-(define (no-losing-percentage c olst clst)
-  ; Competitor -> Boolean
-  ; RETURNS: true if c defeated or tied the given competitor c2
-  (let ([outranks (length (filter (lambda (c2) 
-                                    (and (not (equal? c c2)) (defeated? c c2  olst)))
-                                  clst))]
+(define (no-losing-percentage c olst)
+  ; Outcome -> Boolean
+  ; RETURNS: true if c is the winner of defeat if o is a Defeat 
+  ; or in the tie if o is a Tie otherwise false
+  (let ([outranks (length (filter (lambda (o) (defeated-or-tie? c o)) olst))]
         ; Outcome -> Boolean
         ; RETURNS: true iff c is mentioned in the given outcome o
         [mentions (length (filter (lambda (o) (mentions? c o))
@@ -217,8 +212,22 @@
     (/ outranks mentions)))
 ; Test
 (begin-for-test
-  (check-equal? (no-losing-percentage "D" outcomes competitors) 1/2 
+  (check-equal? (no-losing-percentage "D" outcomes) 1/2 
                 "it should be 1/2"))
+
+; defeated-or-tie?: Competitor Outcome -> Boolean
+; GIVEN: a Competitor c and an Outcome o
+; RETURNS: true if c is the winner of defeat if o is a Defeat 
+; or in the tie if o is a Tie otherwise false
+; Strategy: use observer template of Defeat and Outcome
+; EXAMPLES: (defeated-or-tie? "A" (tie "A" "B")) => true 
+(define (defeated-or-tie? c o)
+  (cond
+    [(defeat? o) (equal? c (defeat-winner o))]
+    [(tie? o) (member-in-tie? c o)]))
+; Test
+(begin-for-test
+  (check-equal? (defeated-or-tie? "A" (tie "A" "B")) true "it should return true"))
 
 ; outranked-less-than?: OutcomeResult OutcomeResult -> Boolean
 ; GIVEN: two OutcomeResult r1 and r2
