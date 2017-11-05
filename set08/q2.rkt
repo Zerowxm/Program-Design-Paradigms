@@ -17,10 +17,8 @@
 ; A OutcomeResult is the result of a competitor's all outcomes represented
 ; as a struct (make-outcome-r comparator outranks outranked percentage)
 ; -competitor Competitor   the owner of this outcomes result
-; -outranks NonNegInteger  indicates the number of competitors
-; outranked by the owner
-; -outranked NonNegInteger indicates the number of competitors
-; that outrank the owner
+; -outranks NonNegInteger  the number of competitors outranked by the owner
+; -outranked NonNegInteger the number of competitors that outrank the owner
 ; -percentage NonNegReal   the number of outcomes in which
 ; the owner defeats or ties another competitor
 ; divided by the number of outcomes that mention the owner. 
@@ -115,8 +113,8 @@
 (define (sort-of-result rslt)
   ; OutcomeResultList ComparatorList -> OutcomeResultList
   ; GIVEN: a OutcomeResultList rslt and a ComparatorList cplst
-  ; WHERE: cplst is a list of functions passed to sort as the comparator
-  ; to sort rslt
+  ; WHERE: cplst is a list of functions passed to sort function
+  ; as the comparator to sort rslt
   ; RETURNS: a list like rslt except it is sorted by cplst 
   ; Strategy: use observer template of ComparatorList
   ; Halting Measure: the length of cplst

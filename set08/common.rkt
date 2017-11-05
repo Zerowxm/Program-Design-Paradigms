@@ -80,41 +80,28 @@
     [else (outcome-fn (first es))
           (olst-fn (rest es))]))
 
-;;; tie : Competitor Competitor -> Tie
-;;; GIVEN: the names of two competitors
-;;; RETURNS: an indication that the two competitors have
-;;;     engaged in a contest, and the outcome was a tie
-;;; EXAMPLE: (see the examples given below for defeated?,
-;;;     which shows the desired combined behavior of tie
-;;;     and defeated?)
-;;; Strategy: use construct template of Tie
-(define (tie c1 c2)
-  (make-tie-t (list c1 c2)))
-; Test
-(begin-for-test
-  (check-equal? (tie A B) (make-tie-t (list A B)) "it returns wrong"))
-
 ; tie?: Outcome -> Boolean
 ; GIVEN: a Outcome ot
 ; RETURNS: true iff ot is a tie
 ; Strategy: use template of tie-t
-; Examples: (tie? (tie A B)) => true
+; Examples: (tie? (make-tie-t (list A B))) => true
 (define (tie? ot)
   (tie-t? ot))
 ; Test
 (begin-for-test
-  (check-equal? (tie? (tie A B)) true "it should return true"))
+  (check-equal? (tie? (make-tie-t (list A B))) true "it should return true"))
 
 ; member-in-tie?: Competitor Tie -> Boolean
 ; GIVEN: a Competitor c and a Tie tie 
 ; RETURNS: true if c in the given tie
 ; Strategy: use observer template of Tie
-; EXAMPLES: (member-in-tie? A (tie A B)) => true
+; EXAMPLES: (member-in-tie? A (make-tie-t (list A B))) => true
 (define (member-in-tie? c tie)
   (member? c (tie-t-competitors tie)))
 ; Test
 (begin-for-test
-  (check-equal? (member-in-tie? A (tie A B)) true "it should return true"))
+  (check-equal? (member-in-tie? A (make-tie-t (list A B))) 
+    true "it should return true"))
 
 ; remove-duplicates: XList -> XList
 ; Given: a list of X which is any type
