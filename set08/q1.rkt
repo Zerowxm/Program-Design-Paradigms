@@ -171,8 +171,8 @@
 ; Strategy: use HOF map on OutcomeList followed by apply
 (define (outranks-or-outranked c olst outranked?)
   (let ([outrank (if (equal? true outranked?) 
-                      defeated-and-tied-by 
-                      defeated-and-tied-of)])
+                     defeated-and-tied-by 
+                     defeated-and-tied-of)])
     ; CompetitorList ComparatorList -> CompetitorList
     ; GIVEN: a CompetitorList clst and a CompetitorList outranked
     ; Where: clst is a list of competitors outranked by c(or that outrank c) and 
@@ -184,14 +184,13 @@
     ; Halting Measure: the length of clst.
     (local [(define (helper clst outranked)
               (let* ([outranked (append outranked clst)]
-                     [clst
                      ; Competitor -> Boolean
                      ; RETURNS: true if the given competitor is not in outranked list
-                      (filter (lambda (x) (not (member? x outranked)))
-                              ; Competitor -> CompetitorList
-                              ; RETURNS: a list of the clst outranked by c
-                              (apply append (map (lambda (c) (outrank c olst))
-                                                 clst)))])
+                     [clst (filter (lambda (x) (not (member? x outranked)))
+                                   ; Competitor -> CompetitorList
+                                   ; RETURNS: a list of the clst outranked by c
+                                   (apply append (map (lambda (c) (outrank c olst))
+                                                      clst)))])
                 (cond
                   [(empty? clst) outranked]
                   [else (helper clst outranked)])))]
@@ -244,6 +243,7 @@
   ; Outcome -> CompetitorList
   ; RETURNS: a list of the competitors outranked by c if by? is true
   ; otherwise a list of the competitors that outrank c in olst
+  ; Strategy: use observer template on Outcome and cases on by?
   (apply append (map (lambda (out) 
                        (cond
                          [(and by? (defeat? out) (equal? c (defeat-loser out))) 
