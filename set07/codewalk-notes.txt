@@ -1,0 +1,51 @@
+TA-1 Name: - Aditya
+TA-2 Name: - Abishek
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set07
+Question Codewalked: - q2
+
+Design Grade: - A
+Presentation Grade: - A
+
+
+================
+
+Examples and Tests:
+
+
+================
+
+Data Design:
+
+
+-- variableTypes is a list ,please use a name which says its a list
+
+-- could have used it as a struct for varTypes , the present design makes it a bit harder to understand
+
+================
+
+Contract/Purpose Statement/Design Strategy:
+
+-- Invariant in type-of-exp is confusing and too wordy , must be written in a more understandable way
+
+
+
+ 
+
+================
+
+Presentation:
+
+
+================
+
+Other:
+
+
+================
+
+
+
+
