@@ -170,23 +170,32 @@
 ;                => '("B" "C") 
 ; Strategy: use HOF map on OutcomeList followed by apply
 (define (outranks-or-outranked c olst outranked?)
-  (let* ([outrank (if (equal? true outranked?) 
+  (let ([outrank (if (equal? true outranked?) 
                       defeated-and-tied-by 
-                      defeated-and-tied-of)]
-         [outranked (outrank c olst)])
-    (local [(define (helper competitors outranked)
-              (let ([competitors
-                     (filter (lambda (x) (not (member? x outranked)))
-                             ; Competitor -> CompetitorList
-                             ; RETURNS: a list of the competitors outranked by c
-                             (apply append (map
-                                            (lambda (c) (outrank c olst))
-                                            competitors)))]
-                    [outranked (append outranked competitors)])
+                      defeated-and-tied-of)])
+    ; CompetitorList ComparatorList -> CompetitorList
+    ; GIVEN: a CompetitorList clst and a CompetitorList outranked
+    ; Where: clst is a list of competitors outranked by c(or that outrank c) and 
+    ; not in outranked,
+    ; outranked is a list of competitors outranked by c(or that outrank c) so far 
+    ; by appending clst if outranked? is true(or false)
+    ; Returns: a list of competitors outranked by c(or that outrank c) if outranked?
+    ; is true(or false)
+    ; Halting Measure: the length of clst.
+    (local [(define (helper clst outranked)
+              (let* ([outranked (append outranked clst)]
+                     [clst
+                     ; Competitor -> Boolean
+                     ; RETURNS: true if the given competitor is not in outranked list
+                      (filter (lambda (x) (not (member? x outranked)))
+                              ; Competitor -> CompetitorList
+                              ; RETURNS: a list of the clst outranked by c
+                              (apply append (map (lambda (c) (outrank c olst))
+                                                 clst)))])
                 (cond
-                  [(empty? competitors) outranked]
-                  [else (helper competitors outranked)])))]
-      (remove-duplicates (helper outranked outranked)))))
+                  [(empty? clst) outranked]
+                  [else (helper clst outranked)])))]
+      (remove-duplicates (helper (outrank c olst) empty)))))
 ; Test
 (begin-for-test
   (check-equal? (outranks-or-outranked "A" (list (defeated "A" "B") (tie "B" "C"))
