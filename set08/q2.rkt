@@ -60,6 +60,28 @@
                        (tie "D" "B")
                        (defeated "F" "E")))
 
+; with power ranking conditions 1 and 2 and 3 and 4
+(define outcomes2 (list (defeated "A" "B")
+                        (defeated "B" "C")
+                        (defeated "C" "F")
+                        (defeated "F" "A")
+                        (defeated "F" "I")
+                        (defeated "F" "I")
+                        (defeated "A" "E")
+                        (defeated "E" "H")
+                        (tie "B" "A")
+                        (tie "A" "G")))
+
+(define results2 (list
+                  (make-outcome-r "G" 8 5 1)
+                  (make-outcome-r "A" 8 5 4/5)
+                  (make-outcome-r "F" 8 5 3/4)
+                  (make-outcome-r "B" 8 5 2/3)
+                  (make-outcome-r "C" 8 5 1/2)
+                  (make-outcome-r "E" 1 5 1/2)
+                  (make-outcome-r "I" 0 5 0)
+                  (make-outcome-r "H" 0 6 0)))
+
 (define competitors (list "A" "D" "E" "C" "B" "F"))
 
 ; A Comparator is a function represented as
@@ -97,7 +119,10 @@
   (map outcome-r-competitor (sort-of-result (results-of-competitors olst))))
 ; Test
 (begin-for-test
-  (check-equal? (power-ranking outcomes) (list "C" "A" "F" "E" "B" "D")))
+  (check-equal? (power-ranking outcomes) (list "C" "A" "F" "E" "B" "D")
+                "it should return (list \"C\" \"A\" \"F\" \"E\" \"B\" \"D\")")
+  (check-equal? (power-ranking outcomes2)
+                (list "G" "A" "F" "B" "C" "E" "I" "H") "it returns wrong"))
 
 ; sort-of-result: OutcomeResultList -> OutcomeResultList
 ; GIVEN: a list of outcome result
@@ -128,6 +153,28 @@
 (begin-for-test
   (check-equal? (sort-of-result results) sorted-results "it returns wrong"))
 
+; list-of-competitors: OutcomeList -> CompetitorList
+; GIVEN: a OutcomeList olst
+; RETURNS: a list of all competitors in olst without repetitions
+; Strategy: use HOF map on olst followed by apply
+; EXAMPLES: (list-of-competitors outcomes) => (list "A" "D" "E" "C" "B" "F")
+(define (list-of-competitors olst)
+  (remove-duplicates
+   ; Outcome -> CompetitorList
+   ; RETURNS: a list of two competitors of the given outcome
+   (apply append (map (lambda (o) (cond
+                                    [(defeat? o) 
+                                     (list (defeat-winner o) (defeat-loser o))]
+                                    [(tie? o) 
+                                     (tie-t-competitors o)])) 
+                      olst))))
+; Test
+(begin-for-test
+  (check-equal? (list-of-competitors outcomes) (list "A" "D" "E" "C" "B" "F")
+                "it returns wrong list")
+  (check-equal? (list-of-competitors outcomes2) (list "A" "B" "C" "F" "I" "E" "H" "G")
+                "it returns wrong list"))
+
 ; results-of-competitors: OutcomeList -> OutcomeResultList
 ; GIVEN: a list of outcomes
 ; RETURNS: a list of outcome results of every competitors
@@ -151,27 +198,17 @@
          clst)))
 ; Test
 (begin-for-test
-  (check-equal? (results-of-competitors outcomes) results "it returns wrong"))
-
-; list-of-competitors: OutcomeList -> CompetitorList
-; GIVEN: a OutcomeList olst
-; RETURNS: a list of all competitors in olst without repetitions
-; Strategy: use HOF map on olst followed by apply
-; EXAMPLES: (list-of-competitors outcomes) => (list "A" "D" "E" "C" "B" "F")
-(define (list-of-competitors olst)
-  (remove-duplicates
-   ; Outcome -> CompetitorList
-   ; RETURNS: a list of two competitors of the given outcome
-   (apply append (map (lambda (o) (cond
-                                    [(defeat? o) 
-                                     (list (defeat-winner o) (defeat-loser o))]
-                                    [(tie? o) 
-                                     (tie-t-competitors o)])) 
-                      olst))))
-; Test
-(begin-for-test
-  (check-equal? (list-of-competitors outcomes) (list "A" "D" "E" "C" "B" "F")
-                "it returns wrong list"))
+  (check-equal? (results-of-competitors outcomes) results "it returns wrong")
+  (check-equal? (results-of-competitors outcomes2) (list
+                                                    (make-outcome-r "A" 8 5 4/5)
+                                                    (make-outcome-r "B" 8 5 2/3)
+                                                    (make-outcome-r "C" 8 5 1/2)
+                                                    (make-outcome-r "F" 8 5 3/4)
+                                                    (make-outcome-r "I" 0 5 0)
+                                                    (make-outcome-r "E" 1 5 1/2)
+                                                    (make-outcome-r "H" 0 6 0)
+                                                    (make-outcome-r "G" 8 5 1))
+                "it returns wrong"))
 
 ; mentions?: Competitor Outcome -> Boolean
 ; GIVEN: a Competitor c and an Outcome out
