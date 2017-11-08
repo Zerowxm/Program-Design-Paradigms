@@ -8,8 +8,8 @@
 
 ;; Test case utilities
 
-(define TIME-LIMIT-S 30)
-(define MEMORY-LIMIT-MB 128)
+(define TIME-LIMIT-S 3600)
+(define MEMORY-LIMIT-MB 512)
 
 (define-syntax limited-test-case
   (syntax-rules ()
