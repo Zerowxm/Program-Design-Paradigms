@@ -6,45 +6,36 @@
 public class Tie1 implements Outcome {
 
     // You should define your fields here.
+    Competitor c1; // the first competitor of this outcome
+    Competitor c2; // the second competitor of this outcome
 
     Tie1 (Competitor c1, Competitor c2) {
-
-        // Your code goes here.
-
+        this.c1 = c1;
+        this.c2 = c2;
     }
 
     // RETURNS: true iff this outcome represents a tie
 
     public boolean isTie () {
-
-        // Your code goes here.
-
+        return true;
     }
 
     // RETURNS: one of the competitors
 
     public Competitor first () {
-
-        // Your code goes here.
-
+        return c1;
     }
 
     // RETURNS: the other competitor
-
     public Competitor second () {
-
-        // Your code goes here.
-
+        return c2;
     }
 
     // GIVEN: no arguments
     // WHERE: this.isTie() is false
     // RETURNS: the winner of this outcome
-
     public Competitor winner () {
-
-        // Your code goes here.
-
+        return null;
     }
 
     // GIVEN: no arguments
@@ -52,8 +43,11 @@ public class Tie1 implements Outcome {
     // RETURNS: the loser of this outcome
 
     public Competitor loser () {
+        return null;
+    }
 
-        // Your code goes here.
-
+    @Override
+    public String toString() {
+        return c1.name() + c2.name();
     }
 }

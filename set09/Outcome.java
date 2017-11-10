@@ -9,25 +9,25 @@ interface Outcome {
 
     // RETURNS: true iff this outcome represents a tie
 
-    boolean isTie ();
+    boolean isTie();
 
     // RETURNS: one of the competitors
 
-    Competitor first ();
+    Competitor first();
 
     // RETURNS: the other competitor
 
-    Competitor second ();
+    Competitor second();
 
     // GIVEN: no arguments
     // WHERE: this.isTie() is false
     // RETURNS: the winner of this outcome
 
-    Competitor winner ();
+    Competitor winner();
 
     // GIVEN: no arguments
     // WHERE: this.isTie() is false
     // RETURNS: the loser of this outcome
 
-    Competitor loser ();
+    Competitor loser();
 }
