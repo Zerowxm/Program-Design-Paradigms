@@ -1,0 +1,46 @@
+TA-1 Name: - vikas91
+TA-2 Name: - aashishvikram
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set08
+Question Codewalked: - q1
+
+Q1 Design Grade: - A
+Q1 Presentation Grade: - AB
+
+Q2 Design Grade: - 
+Q2 Presentation Grade: -
+
+Examples and Tests:
+
+Data Design:
+
+-- Interpretation for defeat does not specify which competitor wins and which one loses
+
+================
+
+Contract/Purpose Statement/Design Strategy:
+
+-- interesting design strategy to assign function to a variable using let.
+
+================
+
+Presentation:
+
+-- student shows good understanding of his/her submission
+
+-- student understands questions that are asked
+
+-- student talks around answer rather than answering precisely
+
+================
+
+Other:
+
+
+================
+
+
+
+
