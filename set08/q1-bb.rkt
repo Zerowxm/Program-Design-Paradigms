@@ -225,6 +225,7 @@
                     (tie "C" "E")
                     (tie "J" "P"))))
      (list "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P")
+     
      "There exists multiple cyclic paths between the competitors"))
    
    (limited-test-case

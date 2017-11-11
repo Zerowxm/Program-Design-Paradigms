@@ -7,7 +7,6 @@
 
 public class Defeat1 implements Outcome {
 
-    // You should define your fields here.
     Competitor winner; //the winner competitor of this outcome
     Competitor loser; // the loser competitor of this outcome
 
@@ -50,8 +49,8 @@ public class Defeat1 implements Outcome {
         return loser;
     }
 
-    @Override
     public String toString() {
         return winner.name() + loser.name();
     }
+
 }

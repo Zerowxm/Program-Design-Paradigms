@@ -1,5 +1,5 @@
 // Constructor template for Competitor1:
-//     new Competitor1 (Competitor c1)
+//     new Competitor1 (String c1)
 //
 // Interpretation: the competitor represents an individual or team
 // the outranked represents a mark and true if this competitor has been visited
@@ -10,8 +10,6 @@
 // invariant says the list is mutable and you are allowed to change it.
 
 import java.util.*;
-import java.util.stream.Collectors;
-// You may import other interfaces and classes here.
 
 class Competitor1 implements Competitor {
 
@@ -22,6 +20,7 @@ class Competitor1 implements Competitor {
     }
 
     // returns the name of this competitor
+    // Examples: new Competitor1("A").name() => "A"
     public String name() {
         return n;
     }
@@ -29,6 +28,8 @@ class Competitor1 implements Competitor {
     // GIVEN: another competitor and a list of outcomes
     // RETURNS: true iff one or more of the outcomes indicates this
     //     competitor has defeated or tied the given competitor
+    // Examples: new Competitor1("A").hasDefeated(competitor("B"),
+    // creatOutcomes(defeated("A", "B"), tie("B", "C")) => true
     public boolean hasDefeated(Competitor c2, List<Outcome> outcomes) {
         for (Outcome o : outcomes)
             if (o.isTie() && isMention(o) && isMention(c2.name(), o))
@@ -42,17 +43,24 @@ class Competitor1 implements Competitor {
     // RETURNS: a list of the names of all competitors mentioned by
     //     the outcomes that are outranked by this competitor,
     //     without duplicates, in alphabetical order
+    // Examples: competitor("A").outranks(creatOutcomes(defeated("A", "B"),
+    //    tie("B", "C"), tie("C", "D"))) => Arrays.asList("C", "B", "D")
+    //    competitor("B").outranks(creatOutcomes(defeated("A", "B"),
+    //    defeated("B","A"))) =>Arrays.asList("A", "B")
     public List<String> outranks(List<Outcome> outcomes) {
         List<String> ns = onDefeatedOrTied(outcomes);
-        int length = ns.size();
-        Set<String> outranked_name = new HashSet<>();
-        while (true) {
-            for (String c : ns)
-                outranked_name.addAll(onDefeatedOrTied(c, outcomes));
-            ns.addAll(outranked_name);
-            ns = ns.stream().distinct().collect(Collectors.toList());
-            if (length == ns.size()) break;
-            else length = ns.size();
+        Set<String> toOutrankList = new HashSet<>(ns);
+        //halting measure: the length of toOutrankedList
+        //when the competitors in toOutrankedList do not outrank any competitors
+        //except who are in ns,since the total number of competitors is limited,
+        //it will break the loop.
+        while (!toOutrankList.isEmpty()) {
+            Set<String> tmp = new HashSet<>(toOutrankList);
+            for (String c : toOutrankList)
+                tmp.addAll(onDefeatedOrTied(c, outcomes));
+            tmp.removeAll(ns);
+            ns.addAll(tmp);
+            toOutrankList = tmp;
         }
         return ns;
     }
@@ -61,17 +69,24 @@ class Competitor1 implements Competitor {
     // RETURNS: a list of the names of all competitors mentioned by
     //     the outcomes that outrank this competitor,
     //     without duplicates, in alphabetical order
+    // Examples:competitor("A").outrankedBy(creatOutcomes(defeated("A", "B"),
+    // tie("B", "C"))) => Collections.emptyList()
+    // competitor("C").outrankedBy(creatOutcomes(defeated("A", "B"),
+    //        tie("B", "C")))  =>   Arrays.asList("A", "B", "C")
     public List<String> outrankedBy(List<Outcome> outcomes) {
         List<String> ns = onDefeatedOrTiedBy(outcomes);
-        int length = ns.size();
-        Set<String> outranked_name = new HashSet<>();
-        while (true) {
-            for (String c : ns)
-                outranked_name.addAll(onDefeatedOrTiedBy(c, outcomes));
-            ns.addAll(outranked_name);
-            ns = ns.stream().distinct().collect(Collectors.toList());
-            if (length == ns.size()) break;
-            else length = ns.size();
+        Set<String> toOutrankList = new HashSet<>(ns);
+        //halting measure: the length of toOutrankedList
+        //when the competitors in toOutrankedList aren't outranked by any competitors
+        //except who are in ns,since the total number of competitors is limited,
+        //it will break the loop.
+        while (!toOutrankList.isEmpty()) {
+            Set<String> tmp = new HashSet<>(toOutrankList);
+            for (String c : toOutrankList)
+                tmp.addAll(onDefeatedOrTiedBy(c, outcomes));
+            tmp.removeAll(ns);
+            ns.addAll(tmp);
+            toOutrankList = tmp;
         }
         return ns;
     }
@@ -82,8 +97,21 @@ class Competitor1 implements Competitor {
     //     the name of competitor A coming before the name of
     //     competitor B in the list if and only if the power-ranking
     //     of A is higher than the power ranking of B.
+    //     Examples:competitor("A").powerRanking(creatOutcomes(
+    // defeated("A", "B"),
+    // defeated("B", "C"),
+    // defeated("C", "F"),
+    // defeated("F", "A"),
+    // defeated("F", "I"),
+    // defeated("F", "I"),
+    // defeated("A", "E"),
+    // defeated("E", "H"),
+    // tie("B", "A"),
+    // tie("A", "G")) =>
+    // Arrays.asList("G", "A", "F", "B", "C", "E", "I", "H")
     public List<String> powerRanking(List<Outcome> outcomes) {
         List<String> competitors = competitorsOfOutcomes(outcomes);
+
         competitors.sort((c1, c2) -> competitor(c1).outrankedBy(outcomes).size()
                 < competitor(c2).outrankedBy(outcomes).size() ? -1 : 1);
 
@@ -97,7 +125,8 @@ class Competitor1 implements Competitor {
                 competitor(c1).outranks(outcomes).size()
                         == competitor(c2).outranks(outcomes).size() &&
                 defeatedSum(c1, outcomes) / mentionSum(c1, outcomes)
-                        > defeatedSum(c2, outcomes) / mentionSum(c2, outcomes) ? -1 : 1);
+                        > defeatedSum(c2, outcomes) / mentionSum(c2, outcomes) ?
+                -1 : 1);
 
         competitors.sort((c1, c2) -> competitor(c1).outrankedBy(outcomes).size()
                 == competitor(c2).outrankedBy(outcomes).size() &&
@@ -112,6 +141,8 @@ class Competitor1 implements Competitor {
     /*
     Given: a name of competitor and a list of outcomes
     Returns: the number of outcomes that c defeated or tied the other
+    Examples: new Competitor1("A").defeatedSum(competitor("B"),
+    creatOutcomes(defeated("A", "B"), tie("B", "C"))) => 1
      */
     private double defeatedSum(String c, List<Outcome> outcomes) {
         int count = 0;
@@ -126,6 +157,8 @@ class Competitor1 implements Competitor {
     /*
     Given: a name of competitor and a list of outcomes
     Returns: the number of outcomes that c are mentioned
+    Examples: new Competitor1("A").mentionSum(competitor("B"),
+    creatOutcomes(defeated("A", "B"), tie("B", "C"))) => 2
      */
     private double mentionSum(String c, List<Outcome> outcomes) {
         int count = 0;
@@ -138,6 +171,9 @@ class Competitor1 implements Competitor {
     /*
         Given: a list of outcomes
         Returns: the list of names of the competitors in the outcomes
+        Examples:competitor("B").competitorsOfOutcomes(
+        creatOutcomes(defeated("A", "B"), tie("B", "C")))
+        => Arrays.asList("A","B","C")
          */
     private List<String> competitorsOfOutcomes(List<Outcome> outcomes) {
         Set<String> names = new HashSet<>();
@@ -150,7 +186,10 @@ class Competitor1 implements Competitor {
 
     /*
     Given: a list of outcomes
-    Returns: A set of competitors in the given list defeated or tied by this competitor
+    Returns: A set of competitors in the given list defeated or tied
+    by this competitor
+    Examples:competitor("B").onDefeatedOrTied(
+    creatOutcomes(defeated("A", "B"), tie("B", "C"))) => Arrays.asList("C")
      */
     private List<String> onDefeatedOrTied(List<Outcome> outcomes) {
         Set<String> names = new HashSet<>();
@@ -167,6 +206,8 @@ class Competitor1 implements Competitor {
     Given: a name of a competitor and a list of outcomes
     Returns: A list of competitors in the given list that
     defeated or tied by given competitor
+    Examples:competitor("B").onDefeatedOrTied(competitor("B"),
+    creatOutcomes(defeated("A", "B"), tie("B", "C"))) => Arrays.asList("C")
     */
     private List<String> onDefeatedOrTied(String c, List<Outcome> outcomes) {
         Set<String> names = new HashSet<>();
@@ -183,6 +224,8 @@ class Competitor1 implements Competitor {
     Given: a list of outcomes
     Returns: A set of competitors in the given list that
     defeats or ties this competitor
+    Examples:competitor("B").onDefeatedOrTiedBy(
+    creatOutcomes(defeated("A", "B"), tie("B", "C"))) => Arrays.asList("A","C")
     */
     private List<String> onDefeatedOrTiedBy(List<Outcome> outcomes) {
         Set<String> names = new HashSet<>();
@@ -191,7 +234,7 @@ class Competitor1 implements Competitor {
                 names.add(o.first().name());
                 names.add(o.second().name());
             } else if (!o.isTie() && o.loser().equals(this))
-                    names.add(o.winner().name());
+                names.add(o.winner().name());
         return new ArrayList<>(names);
     }
 
@@ -199,6 +242,8 @@ class Competitor1 implements Competitor {
     Given: a name of a competitor and a list of outcomes
     Returns: A set of competitors in the given list that
     defeats or ties the given competitor
+    Examples:competitor("B").onDefeatedOrTiedBy(competitor("B"),
+    creatOutcomes(defeated("A", "B"), tie("B", "C"))) => Arrays.asList("A","C")
     */
     private List<String> onDefeatedOrTiedBy(String c, List<Outcome> outcomes) {
         Set<String> names = new HashSet<>();
@@ -207,7 +252,7 @@ class Competitor1 implements Competitor {
                 names.add(o.first().name());
                 names.add(o.second().name());
             } else if (!o.isTie() && o.loser().name().equals(c))
-                    names.add(o.winner().name());
+                names.add(o.winner().name());
         return new ArrayList<>(names);
     }
 
@@ -227,118 +272,18 @@ class Competitor1 implements Competitor {
         return o.first().equals(this) || o.second().equals(this);
     }
 
-    @Override
     public boolean equals(Object obj) {
-        return  ((Competitor) obj).name().equals(n);
+        return obj instanceof Competitor && ((Competitor) obj).name().equals(n);
     }
 
-    @Override
     public String toString() {
         return name();
     }
 
-    public static void main(String[] args) {
-        List<Outcome> outcomes = creatOutcomes(defeated("A", "B"), tie("B", "C"));
-        List<Outcome> outcomes2 = creatOutcomes(defeated("A", "B"), defeated("B", "A"));
-        List<Outcome> outcomes3 = creatOutcomes(defeated("A", "B"),
-                tie("B", "C"), tie("C", "D"));
-
-        checkTrue(listEqual(competitor("A").outrankedBy(outcomes),
-                Collections.emptyList()), "Test1");
-        checkTrue(listEqual(competitor("B").outrankedBy(outcomes2),
-                Arrays.asList("A", "B")), "Test2");
-        checkTrue(listEqual(competitor("C").outrankedBy(outcomes),
-                Arrays.asList("A", "B", "C")), "Test3");
-        checkTrue(competitor("A").hasDefeated(competitor("B"), outcomes), "Test 4");
-        checkTrue(competitor("B").hasDefeated(competitor("C"), outcomes), "Test 5");
-
-        checkTrue(listEqual(competitor("A").outranks(outcomes3),
-                Arrays.asList("C", "B", "D")), "Test6");
-        checkTrue(listEqual(competitor("B").outranks(outcomes2),
-                Arrays.asList("A", "B")), "Test7");
-        checkTrue(listEqual(competitor("C").outranks(outcomes3),
-                Arrays.asList("B", "C", "D")), "Test8");
-        checkTrue(competitor("A").name().equals("A"), "Test9");
-
-        List<Outcome> outcomes4 = creatOutcomes(defeated("A", "D"),
-                defeated("A", "E"),
-                defeated("C", "B"),
-                defeated("C", "F"),
-                tie("D", "B"),
-                defeated("F", "E"));
-        checkTrue(listEqual(competitor("A").powerRanking(outcomes4),
-                Arrays.asList("A", "F", "E", "B", "C", "D")), "Test10");
-
-        List<Outcome> outcomes5 = creatOutcomes(defeated("A", "B"),
-                defeated("B", "C"),
-                defeated("C", "F"),
-                defeated("F", "A"),
-                defeated("F", "I"),
-                defeated("F", "I"),
-                defeated("A", "E"),
-                defeated("E", "H"),
-                tie("B", "A"),
-                tie("A", "G"));
-        checkTrue(listEqual(competitor("A").powerRanking(outcomes5),
-                Arrays.asList("G", "A", "F", "B", "C", "E", "I", "H")), "Test11");
-        Competitor A = competitor("A");
-        checkTrue(listEqual(A.powerRanking(creatOutcomes(defeated("A", "B"),
-                defeated("B", "C"),
-                defeated("C", "D"),
-                tie("D", "E"),
-                defeated("E", "H"),
-                tie("F", "I"),
-                tie("G", "K"),
-                defeated("H", "L"),
-                defeated("I", "M"),
-                tie("J", "N"),
-                tie("P", "B"),
-                tie("C", "E"),
-                defeated("J", "P"),
-                tie("Q", "P"),
-                defeated("R", "K"),
-                tie("S", "L"),
-                defeated("T", "A"),
-                defeated("U", "B"),
-                defeated("V", "E"),
-                defeated("W", "P"),
-                tie("X", "B"),
-                defeated("Y", "E"),
-                defeated("Z", "P"))),
-                Arrays.asList("T", "U", "W", "Z", "V", "Y", "R", "A", "J", "N", "F",
-                        "I", "M", "G", "K", "Q", "X", "B", "P", "C", "E", "D", "H", "S", "L")),
-                "Test12");
-
-        checkTrue(listEqual(A.powerRanking(creatOutcomes(defeated("C", "E"),
-                defeated("D", "C"),
-                tie("D", "B"))), Arrays.asList("B", "D", "C", "E")), "Test13");
-
-        checkTrue(listEqual(A.powerRanking(creatOutcomes(defeated("A", "B"),
-                tie("B", "C"),
-                defeated("C", "D"),
-                tie("D", "E"),
-                defeated("E", "H"),
-                tie("F", "I"),
-                tie("G", "K"),
-                defeated("H", "L"),
-                defeated("I", "M"),
-                tie("J", "N"),
-                defeated("K", "O"),
-                tie("L", "P"),
-                defeated("M", "K"),
-                tie("N", "L"),
-                defeated("O", "A"),
-                tie("P", "B"),
-                tie("C", "E"),
-                tie("J", "P"))), Arrays.asList("F", "I", "M", "G", "K", "O", "A", "C",
-                "E", "J", "N", "P", "B", "L", "D", "H")), "Test14");
-        System.out.println("Test passed:" + testCount);
-    }
-
     /*
-    Given: two lists of string
-    Returns: true if they contain the same strings
-     */
+        Given: two lists of string
+        Returns: true if they contain the same strings
+         */
     private static Boolean listEqual(List<String> sl1, List<String> sl2) {
         if (sl1.containsAll(sl2) && sl2.containsAll(sl1))
             return true;
@@ -348,7 +293,6 @@ class Competitor1 implements Competitor {
         }
     }
 
-    private static int testCount;
 
     private static void checkTrue(Boolean result, String name) {
         if (result) testCount++;
@@ -374,12 +318,12 @@ class Competitor1 implements Competitor {
     /*
     Given: any number of outcomes
     Returns: a list of outcomes
+    Examples:creatOutcomes(defeated("A", "B"), tie("B", "C")) =>
+    Arrays.asList(defeated("A", "B"), tie("B", "C"))
      */
     private static List<Outcome> creatOutcomes(Outcome... outcomes) {
-        List<Outcome> newOutcomes = new ArrayList();
-        for (Outcome o : outcomes) {
-            newOutcomes.add(o);
-        }
+        List<Outcome> newOutcomes = new ArrayList<>();
+        Collections.addAll(newOutcomes, outcomes);
         return newOutcomes;
     }
 
@@ -389,5 +333,211 @@ class Competitor1 implements Competitor {
      */
     private static Competitor competitor(String name) {
         return new Competitor1(name);
+    }
+
+    //Tests
+    private static int testCount = 0;
+
+    public static void main(String[] args) {
+        //Test Competitor
+        List<Outcome> outcomes = creatOutcomes(defeated("A", "B"), tie("B", "C"));
+        List<Outcome> outcomes2 = creatOutcomes(defeated("A", "B"),
+                defeated("B", "A"));
+        List<Outcome> outcomes3 = creatOutcomes(defeated("A", "B"),
+                tie("B", "C"), tie("C", "D"));
+        Competitor A = competitor("A");
+        Competitor B = competitor("B");
+        Competitor C = competitor("C");
+
+        checkTrue(listEqual(A.outrankedBy(outcomes),
+                Collections.emptyList()), "Test1");
+        checkTrue(listEqual(B.outrankedBy(outcomes2),
+                Arrays.asList("A", "B")), "Test2");
+        checkTrue(listEqual(C.outrankedBy(outcomes),
+                Arrays.asList("A", "B", "C")), "Test3");
+
+        checkTrue(A.hasDefeated(B, outcomes), "Test 4");
+        checkTrue(B.hasDefeated(C, outcomes), "Test 5");
+
+        checkTrue(listEqual(A.outranks(outcomes3),
+                Arrays.asList("C", "B", "D")), "Test6");
+        checkTrue(listEqual(B.outranks(outcomes2),
+                Arrays.asList("A", "B")), "Test7");
+        checkTrue(listEqual(C.outranks(outcomes3),
+                Arrays.asList("B", "C", "D")), "Test8");
+
+        checkTrue(A.name().equals("A"), "Test9");
+
+        checkTrue(listEqual(A.powerRanking(creatOutcomes(
+                defeated("A", "D"),
+                defeated("A", "E"),
+                defeated("C", "B"),
+                defeated("C", "F"),
+                tie("D", "B"),
+                defeated("F", "E"))),
+                Arrays.asList("A", "F", "E", "B", "C", "D")), "Test10");
+
+        checkTrue(listEqual(A.powerRanking(creatOutcomes(
+                defeated("A", "B"),
+                defeated("B", "C"),
+                defeated("C", "F"),
+                defeated("F", "A"),
+                defeated("F", "I"),
+                defeated("F", "I"),
+                defeated("A", "E"),
+                defeated("E", "H"),
+                tie("B", "A"),
+                tie("A", "G"))),
+                Arrays.asList("G", "A", "F", "B", "C", "E", "I", "H")), "Test11");
+
+        checkTrue(listEqual(A.powerRanking(creatOutcomes(
+                defeated("A", "B"),
+                defeated("B", "C"),
+                defeated("C", "D"),
+                tie("D", "E"),
+                defeated("E", "H"),
+                tie("F", "I"),
+                tie("G", "K"),
+                defeated("H", "L"),
+                defeated("I", "M"),
+                tie("J", "N"),
+                tie("P", "B"),
+                tie("C", "E"),
+                defeated("J", "P"),
+                tie("Q", "P"),
+                defeated("R", "K"),
+                tie("S", "L"),
+                defeated("T", "A"),
+                defeated("U", "B"),
+                defeated("V", "E"),
+                defeated("W", "P"),
+                tie("X", "B"),
+                defeated("Y", "E"),
+                defeated("Z", "P"))),
+                Arrays.asList("T", "U", "W", "Z", "V", "Y", "R", "A", "J", "N",
+                        "F", "I", "M", "G", "K", "Q", "X",
+                        "B", "P", "C", "E", "D", "H", "S", "L")),
+                "Test12");
+
+        checkTrue(listEqual(A.powerRanking(creatOutcomes(
+                defeated("C", "E"),
+                defeated("D", "C"),
+                tie("D", "B"))), Arrays.asList("B", "D", "C", "E")), "Test13");
+
+        checkTrue(listEqual(A.powerRanking(creatOutcomes(
+                defeated("A", "B"),
+                tie("B", "C"),
+                defeated("C", "D"),
+                tie("D", "E"),
+                defeated("E", "H"),
+                tie("F", "I"),
+                tie("G", "K"),
+                defeated("H", "L"),
+                defeated("I", "M"),
+                tie("J", "N"),
+                defeated("K", "O"),
+                tie("L", "P"),
+                defeated("M", "K"),
+                tie("N", "L"),
+                defeated("O", "A"),
+                tie("P", "B"),
+                tie("C", "E"),
+                tie("J", "P"))), Arrays.asList("F", "I", "M", "G", "K", "O",
+                "A", "C", "E", "J", "N", "P", "B", "L", "D", "H")), "Test14");
+
+        checkTrue(listEqual(competitor("F").outrankedBy(creatOutcomes(
+                defeated("A", "B"),
+                defeated("B", "C"),
+                defeated("C", "D"),
+                defeated("D", "E"),
+                defeated("E", "H"),
+                defeated("F", "I"),
+                defeated("G", "K"),
+                defeated("H", "L"),
+                defeated("I", "M"),
+                defeated("J", "N"),
+                defeated("K", "O"),
+                defeated("L", "P"),
+                defeated("M", "K"),
+                defeated("N", "L"),
+                defeated("O", "A"),
+                defeated("P", "B"),
+                tie("C", "E"))), Collections.emptyList()), "Test15");
+
+        checkTrue(listEqual(competitor("E").outrankedBy(creatOutcomes(
+                defeated("A", "B"),
+                defeated("B", "C"),
+                defeated("C", "D"),
+                defeated("D", "E"),
+                defeated("E", "H"),
+                defeated("F", "I"),
+                defeated("G", "K"),
+                defeated("H", "L"),
+                defeated("I", "M"),
+                defeated("J", "N"),
+                defeated("K", "O"),
+                defeated("L", "P"),
+                defeated("M", "K"),
+                defeated("N", "L"),
+                defeated("O", "A"),
+                defeated("P", "B"),
+                tie("C", "E"),
+                tie("J", "P"))),
+                Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                        "K", "L", "M", "N", "O", "P")), "Test16");
+
+        checkTrue(listEqual(competitor("F").outranks(creatOutcomes(
+                defeated("A", "B"),
+                defeated("B", "C"),
+                defeated("C", "D"),
+                defeated("D", "E"),
+                defeated("E", "H"),
+                defeated("F", "I"),
+                defeated("G", "K"),
+                defeated("H", "L"),
+                defeated("I", "M"),
+                defeated("J", "N"),
+                defeated("K", "O"),
+                defeated("L", "P"),
+                defeated("M", "K"),
+                defeated("N", "L"),
+                defeated("O", "A"),
+                defeated("P", "B"),
+                tie("C", "E"))),
+                Arrays.asList("A", "B", "C", "D", "E",
+                        "H", "I", "K", "L", "M", "O", "P")), "Test17");
+        checkTrue(listEqual(competitor("E").outranks(creatOutcomes(
+                defeated("A", "B"),
+                defeated("B", "C"),
+                defeated("C", "D"),
+                defeated("D", "E"),
+                defeated("E", "H"),
+                defeated("F", "I"),
+                defeated("G", "K"),
+                defeated("H", "L"),
+                defeated("I", "M"),
+                defeated("J", "N"),
+                defeated("K", "O"),
+                defeated("L", "P"),
+                defeated("M", "K"),
+                defeated("N", "L"),
+                defeated("O", "A"),
+                defeated("P", "B"),
+                tie("C", "E"),
+                tie("J", "P"))),
+                Arrays.asList("B", "C", "D", "E", "H", "J", "L", "N", "P")),
+                "Test18");
+
+        // Test Outcome
+        Outcome tie = new Tie1(A, B);
+        checkTrue(tie.isTie(), "Test19");
+        checkTrue(tie.first().name().equals("A")
+                && tie.second().name().equals("B"), "Test20");
+
+        Outcome defeat = new Defeat1(competitor("A"), B);
+        checkTrue(defeat.winner().name().equals("A")
+                && defeat.loser().name().equals("B"), "Test21");
+
+        System.out.println("Test passed:" + testCount);
     }
 }

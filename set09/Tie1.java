@@ -46,7 +46,6 @@ public class Tie1 implements Outcome {
         return null;
     }
 
-    @Override
     public String toString() {
         return c1.name() + c2.name();
     }
