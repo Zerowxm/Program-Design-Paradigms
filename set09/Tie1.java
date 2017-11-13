@@ -15,13 +15,13 @@ public class Tie1 implements Outcome {
     }
 
     // RETURNS: true iff this outcome represents a tie
-
+    // Examples: new Tie1(new Competitor1("A"),new Competitor1("B"))
+    // .isTie() => true
     public boolean isTie () {
         return true;
     }
 
     // RETURNS: one of the competitors
-
     public Competitor first () {
         return c1;
     }
@@ -41,11 +41,13 @@ public class Tie1 implements Outcome {
     // GIVEN: no arguments
     // WHERE: this.isTie() is false
     // RETURNS: the loser of this outcome
-
     public Competitor loser () {
         return null;
     }
-
+    
+    /*
+    Returns the name of winner and loser
+     */
     public String toString() {
         return c1.name() + c2.name();
     }

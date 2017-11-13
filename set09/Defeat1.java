@@ -16,19 +16,22 @@ public class Defeat1 implements Outcome {
     }
 
     // RETURNS: true iff this outcome represents a tie
-
+    // Examples: new Defeat1(new Competitor1("A"),new Competitor1("B"))
+    // .isTie() => false
     public boolean isTie () {
         return false;
     }
 
     // RETURNS: one of the competitors
-
+    // Examples: new Defeat1(new Competitor1("A"),new Competitor1("B"))
+    // .first() => "A"
     public Competitor first () {
         return winner;
     }
 
     // RETURNS: the other competitor
-
+    // Examples: new Defeat1(new Competitor1("A"),new Competitor1("B"))
+    // .second() => "B"
     public Competitor second () {
         return loser;
     }
@@ -36,7 +39,6 @@ public class Defeat1 implements Outcome {
     // GIVEN: no arguments
     // WHERE: this.isTie() is false
     // RETURNS: the winner of this outcome
-
     public Competitor winner () {
         return winner;
     }
@@ -44,11 +46,13 @@ public class Defeat1 implements Outcome {
     // GIVEN: no arguments
     // WHERE: this.isTie() is false
     // RETURNS: the loser of this outcome
-
     public Competitor loser () {
         return loser;
     }
 
+    /*
+    Returns the name of winner and loser
+     */
     public String toString() {
         return winner.name() + loser.name();
     }
