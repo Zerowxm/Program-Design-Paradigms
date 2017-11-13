@@ -2,7 +2,6 @@
 //     new Competitor1 (String c1)
 //
 // Interpretation: the competitor represents an individual or team
-// the outranked represents a mark and true if this competitor has been visited
 
 // Note:  In Java, you cannot assume a List is mutable, because all
 // of the List operations that change the state of a List are optional.
