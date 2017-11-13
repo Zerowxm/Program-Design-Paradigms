@@ -2,6 +2,7 @@
 //     new Competitor1 (String c1)
 //
 // Interpretation: the competitor represents an individual or team
+// the outranked represents a mark and true if this competitor has been visited
 
 // Note:  In Java, you cannot assume a List is mutable, because all
 // of the List operations that change the state of a List are optional.
@@ -264,7 +265,7 @@ class Competitor1 implements Competitor {
     /*
     Given: a name of a competitor and a outcome
     Returns: true is the given competitor is in the given contest
-    Exmaples: competitor("B").isMention("B",tie("B", "C")) => true
+    Examples: competitor("B").isMention("B",tie("B", "C")) => true
      */
     private Boolean isMention(String c, Outcome o) {
         return o.first().name().equals(c) || o.second().name().equals(c);
@@ -279,6 +280,13 @@ class Competitor1 implements Competitor {
         return o.first().equals(this) || o.second().equals(this);
     }
 
+    /*
+            Given: a name of a competitor
+            Returns: a Competitor
+             */
+    private Competitor competitor(String name) {
+        return new Competitor1(name);
+    }
     /*
     Given: a object obj
     Returns: if the given one is Competitor and the name of obj is equal to n
@@ -297,6 +305,20 @@ class Competitor1 implements Competitor {
     }
 
     /*
+    Returns: the hashcode of this competitor
+     */
+    public int hashCode() {
+        return n.hashCode();
+    }
+
+    //Tests
+    public static void main(String[] args) {
+        Tests.main(args);
+    }
+}
+
+class Tests{
+    /*
         Given: two lists of string
         Returns: true if they contain the same strings
         Examples: competitor("B").listEqual(Arrays.asList("A","B"),
@@ -313,9 +335,8 @@ class Competitor1 implements Competitor {
         }
     }
 
-
     /*
-    Given: a boolean and a string 
+    Given: a boolean and a string
     Effect: testCount add 1 iff result is true else print the test fail msg
      */
     private static void checkTrue(Boolean result, String name) {
@@ -359,9 +380,7 @@ class Competitor1 implements Competitor {
         return new Competitor1(name);
     }
 
-    //Tests
     private static int testCount = 0;// number of tests
-
     public static void main(String[] args) {
         //Test Competitor
         List<Outcome> outcomes = createOutcomes(defeated("A", "B"), tie("B", "C"));
