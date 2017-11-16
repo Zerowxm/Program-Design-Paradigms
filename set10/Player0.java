@@ -1,12 +1,17 @@
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Zero on 11/14/2017.
  */
 //
-public abstract class Player0 implements Player {
+public class Player0 implements Player, Comparable {
     String n; // the name of this player
     boolean underContract; // the mark under a contract or not of this player
     boolean isInjure; // the mark of this player injure
-    boolean isSuspended; // the mark of this player Suspened
+    boolean isSuspended; // the mark of this player Suspended
+    private final Integer rand;
 
 
     public Player0(String n) {
@@ -14,6 +19,7 @@ public abstract class Player0 implements Player {
         underContract = true;
         isInjure = false;
         isSuspended = false;
+        rand = new Random().nextInt();
     }
 
     // Returns the name of this player.
@@ -84,7 +90,7 @@ public abstract class Player0 implements Player {
 
     @Override
     public int hashCode() {
-        return n.hashCode();
+        return n.hashCode()+rand + Objects.hash(n,rand);
     }
 
     @Override
@@ -99,4 +105,11 @@ public abstract class Player0 implements Player {
     }
 
 
+    @Override
+    public int compareTo(Object o) throws ClassCastException {
+        if (!(o instanceof Player))
+            throw new ClassCastException("A Person object expected.");
+        Player player = (Player) o;
+        return player.hashCode();
+    }
 }

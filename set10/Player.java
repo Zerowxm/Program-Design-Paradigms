@@ -37,7 +37,7 @@ interface Player {
     //     gw.changeInjuryStatus (true);
     //     System.out.println (gw.available());  // prints false
 
-    boolean available ();
+        boolean available ();
 
     // Returns true iff this player is under contract (employed).
     // Example:

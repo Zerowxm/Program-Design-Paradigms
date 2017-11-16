@@ -6,6 +6,6 @@ import java.util.TreeSet;
  */
 public class MyTreeSet extends TreeSet<Player> {
     public MyTreeSet() {
-        super(Comparator.comparing(Player::name));
+        super(Comparator.comparing(Player::hashCode));
     }
 }

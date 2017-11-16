@@ -3,6 +3,6 @@
  */
 public class Players {
     public static Player make(String name){
-        return new Player1(name);
+        return new Player0(name);
     }
 }
