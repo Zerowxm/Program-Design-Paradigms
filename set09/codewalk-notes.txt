@@ -1,0 +1,21 @@
+TA-1 Name: Aditya
+TA-2 Name: Yasaman
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set09
+Question Codewalked: 1,2
+
+Q1 Design Grade: A
+Q1 Presentation Grade: A
+
+Q2 Design Grade: A
+Q2 Presentation Grade: A
+
+================
+
+Interfaces, Objects, and Classes
+
+-- in powerRanking() : no need to sort four times. use a comparator that considers all four conditions
+
+================
