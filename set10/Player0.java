@@ -1,6 +1,4 @@
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Zero on 11/14/2017.
@@ -11,8 +9,7 @@ public class Player0 implements Player, Comparable {
     boolean underContract; // the mark under a contract or not of this player
     boolean isInjure; // the mark of this player injure
     boolean isSuspended; // the mark of this player Suspended
-    private final Integer rand;
-
+    private final Integer rand; // random number for hashCode()
 
     public Player0(String n) {
         this.n = n;
@@ -82,12 +79,13 @@ public class Player0 implements Player, Comparable {
         isSuspended = newStatus;
     }
 
+    // true if the given object is the same referrence of this object
     @Override
     public boolean equals(Object o) {
         return this == o;
-
     }
 
+    // Returns: the unique hashCode of this object
     @Override
     public int hashCode() {
         return n.hashCode()+rand + Objects.hash(n,rand);
@@ -104,7 +102,9 @@ public class Player0 implements Player, Comparable {
                 '}';
     }
 
-
+    // Implemented the comparable interface
+    // Given: an object
+    // Returns: hashCode of the given objcet if it is Player
     @Override
     public int compareTo(Object o) throws ClassCastException {
         if (!(o instanceof Player))

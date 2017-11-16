@@ -5,13 +5,22 @@ import java.util.stream.Collectors;
 /**
  * Created by Zero on 11/14/2017.
  */
+// new Roster0(Set<Player> players)
+// players is a set of Player
+// Rosters.empty() is a static factory method that returns an
+// empty roster.
+
 final public class Roster0 implements Roster {
-    final private Set<Player> players;
+    final private Set<Player> players; // a immutable list of players of this roster
 
     public Roster0(Set<Player> players) {
         this.players = players;
     }
 
+    // Returns a roster consisting of the given player together
+    // with all players on this roster.
+    // Example:
+    //     r.with(p).with(p)  =>  r.with(p)
     @Override
     public Roster with(Player p) {
         if (players.contains(p)) {
@@ -23,6 +32,11 @@ final public class Roster0 implements Roster {
         return Rosters.make(pl);
     }
 
+    // Returns a roster consisting of all players on this roster
+    // except for the given player.
+    // Examples:
+    //     Rosters.empty().without(p)  =>  Rosters.empty()
+    //     r.without(p).without(p)     =>  r.without(p)
     @Override
     public Roster without(Player p) {
         if (!players.contains(p)) {
@@ -36,16 +50,38 @@ final public class Roster0 implements Roster {
         }
     }
 
+    // Returns true iff the given player is on this roster.
+    // Examples:
+    //
+    //     Rosters.empty().has(p)  =>  false
+    //
+    // If r is any roster, then
+    //
+    //     r.with(p).has(p)     =>  true
+    //     r.without(p).has(p)  =>  false
     @Override
     public boolean has(Player p) {
         return players.contains(p);
     }
 
+    // Returns the number of players on this roster.
+    // Examples:
+    //
+    //     Rosters.empty().size()  =>  0
+    //
+    // If r is a roster with r.size() == n, and r.has(p) is false, then
+    //
+    //     r.without(p).size()          =>  n
+    //     r.with(p).size               =>  n+1
+    //     r.with(p).with(p).size       =>  n+1
+    //     r.with(p).without(p).size()  =>  n
     @Override
     public int size() {
         return players.size();
     }
 
+    // Returns the number of players on this roster whose current
+    // status indicates they are available.
     @Override
     public int readyCount() {
         int count = 0;
@@ -55,12 +91,16 @@ final public class Roster0 implements Roster {
         return count;
     }
 
+    // Returns a roster consisting of all players on this roster
+    // whose current status indicates they are available.
     @Override
     public Roster readyRoster() {
         Set<Player> newPlayers = players.stream().filter(Player::available).collect(Collectors.toCollection(MyTreeSet::new));
         return Rosters.make(newPlayers);
     }
 
+    // Returns an iterator that generates each player on this
+    // roster exactly once, in alphabetical order by name.
     @Override
     public Iterator<Player> iterator() {
         return players.stream()
@@ -68,6 +108,7 @@ final public class Roster0 implements Roster {
                 .collect(Collectors.toList()).iterator();
     }
 
+    //Returns true if o is Roster, and o and this roster have the same players
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -79,6 +120,7 @@ final public class Roster0 implements Roster {
 
     }
 
+    // Returns: the unique hashCode of this object
     @Override
     public int hashCode() {
         return players != null ? players.hashCode() : 0;
@@ -89,30 +131,5 @@ final public class Roster0 implements Roster {
         return "Roster{" +
                 "players=" + players +
                 '}';
-    }
-
-    private static final class RosterIterator implements Iterator<Player> {
-        int position;
-        Set<Player> players;
-
-        public RosterIterator(Set<Player> players) {
-            this.players = players;
-            position = 0;
-        }
-
-        public boolean hasNext() {
-            return position < players.size() - 1;
-        }
-
-        public Player next() {
-            if (this.hasNext()) {
-                return null;
-            }
-            throw new NoSuchElementException();
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
     }
 }
