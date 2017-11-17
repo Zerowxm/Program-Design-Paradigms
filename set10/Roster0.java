@@ -42,7 +42,6 @@ final public class Roster0 implements Roster {
         if (!players.contains(p)) {
             return this;
         } else {
-//            Set<Player> pl = new HashSet<>(players);
             Set<Player> pl = new MyTreeSet();
             pl.addAll(players);
             pl.remove(p);
@@ -66,11 +65,8 @@ final public class Roster0 implements Roster {
 
     // Returns the number of players on this roster.
     // Examples:
-    //
     //     Rosters.empty().size()  =>  0
-    //
     // If r is a roster with r.size() == n, and r.has(p) is false, then
-    //
     //     r.without(p).size()          =>  n
     //     r.with(p).size               =>  n+1
     //     r.with(p).with(p).size       =>  n+1
@@ -115,16 +111,10 @@ final public class Roster0 implements Roster {
         if (o == null || getClass() != o.getClass()) return false;
 
         Roster0 players1 = (Roster0) o;
-
-        return !(players != null ? !players.equals(players1.players) : players1.players != null);
-
+        return players.equals(players1.players);
     }
 
-    // Returns: the unique hashCode of this object
-    @Override
-    public int hashCode() {
-        return players != null ? players.hashCode() : 0;
-    }
+
 
     @Override
     public String toString() {

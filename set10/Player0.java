@@ -85,11 +85,7 @@ public class Player0 implements Player, Comparable {
         return this == o;
     }
 
-    // Returns: the unique hashCode of this object
-    @Override
-    public int hashCode() {
-        return n.hashCode()+rand + Objects.hash(n,rand);
-    }
+
 
     @Override
     public String toString() {

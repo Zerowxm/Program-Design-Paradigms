@@ -70,6 +70,8 @@ public class Test {
 
         Roster rosters = allReady.with(p1).with(p2).with(p3).with(Players.make("Xiao ming"));
         rosters = rosters.with(p1).with(p2).with(p3).with(Players.make("Guang fan"));
+        p1.changeSuspendedStatus(true);
+        rosters = rosters.with(p1).with(p2).with(p3);
         rosters = rosters.with(p1).with(p2).with(p3).with(Players.make("a"));
         rosters = rosters.with(p1).with(p2).with(p3).with(Players.make("b"));
         rosters = rosters.with(p1).with(p2).with(p3).with(Players.make("jjj"));
