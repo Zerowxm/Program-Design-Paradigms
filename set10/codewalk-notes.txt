@@ -1,0 +1,29 @@
+TA-1 Name: - Vinod
+TA-2 Name: - Aashish
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set10
+Question Codewalked: - Q1 Q2
+
+Q1 Design Grade: - B
+Q1 Presentation Grade: - AB
+
+Q2 Design Grade: - B
+Q2 Presentation Grade: - AB
+
+
+-- incorrect compareTo purpose statement and implementation 
+-- hashCode for Roster missing
+
+
+================
+
+Presentation:
+
+-- Unable to answer return values for compareTo method
+
+
+
+
+
