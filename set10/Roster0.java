@@ -122,4 +122,12 @@ final public class Roster0 implements Roster {
                 "players=" + players +
                 '}';
     }
+
+    /*
+    Returns: the hashcode of this roster
+     */
+    @Override
+    public int hashCode() {
+        return players.hashCode();
+    }
 }
