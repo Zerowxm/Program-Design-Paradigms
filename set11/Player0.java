@@ -4,19 +4,17 @@ import java.util.*;
  * Created by Zero on 11/14/2017.
  */
 //
-public class Player0 implements Player, Comparable {
+public class Player0 implements Player{
     String n; // the name of this player
     boolean underContract; // the mark under a contract or not of this player
     boolean isInjure; // the mark of this player injure
     boolean isSuspended; // the mark of this player Suspended
-    private final Integer rand; // random number for hashCode()
 
     public Player0(String n) {
         this.n = n;
         underContract = true;
         isInjure = false;
         isSuspended = false;
-        rand = new Random().nextInt();
     }
 
     // Returns the name of this player.
@@ -99,22 +97,5 @@ public class Player0 implements Player, Comparable {
     @Override
     public int hashCode() {
         return super.hashCode();
-    }
-
-    // Implemented the comparable interface
-    // Given an Object
-    // Return: 0 if the given one is equal to this, 
-    // -1 if the name of this is equal
-    // to or less than the given one, otherwise 1
-    @Override
-    public int compareTo(Object o) throws ClassCastException {
-        if (!(o instanceof Player))
-            throw new ClassCastException("A Person object expected.");
-        Player player = (Player) o;
-        if (this.equals(player))
-            return 0;
-        else if(n.equals(player.name()))
-            return -1;
-        else return n.compareTo(player.name());
     }
 }
