@@ -103,7 +103,8 @@ public class Player0 implements Player, Comparable {
 
     // Implemented the comparable interface
     // Given an Object
-    // Return: 0 if the given one is equal to this, -1 if the name of this is equal
+    // Return: 0 if the given one is equal to this, 
+    // -1 if the name of this is equal
     // to or less than the given one, otherwise 1
     @Override
     public int compareTo(Object o) throws ClassCastException {

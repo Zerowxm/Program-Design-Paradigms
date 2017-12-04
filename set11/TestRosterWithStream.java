@@ -21,28 +21,40 @@ public class TestRosterWithStream {
         RosterWithStream rosterWithStream = RosterWithStreams.empty()
                 .with(p1).with(p2).with(p3).with(p4);
         checkTrue(!rosterWithStream.stream()
-                .allMatch(Player::available), "Test allMatch");
+                .allMatch(Player::available), 
+                "Test allMatch");
         checkTrue(!rosterWithStream.stream()
-                .allMatch(Player::underContract), "Test allMatch");
+                .allMatch(Player::underContract), 
+                "Test allMatch");
         checkTrue(rosterWithStream.stream()
-                .anyMatch(Player::available), "Test anyMatch");
+                .anyMatch(Player::available), 
+                "Test anyMatch");
         checkTrue(rosterWithStream.stream()
-                .anyMatch(Player::underContract), "Test anyMatch");
+                .anyMatch(Player::underContract),
+                 "Test anyMatch");
 
         checkEqual(RosterWithStreams.empty()
-                .stream().count(), (long) 0, "Test Stream count");
+                .stream().count(), (long) 0, 
+                "Test Stream count");
         checkEqual(RosterWithStreams.empty()
-                .stream().findFirst().isPresent(), false, "Test findFirst isPresent");
+                .stream().findFirst().isPresent(), false, 
+                "Test findFirst isPresent");
         checkEqual(RosterWithStreams.empty().with(p2).with(p1)
-                .stream().findFirst().get(), p1, "Test findFirst");
+                .stream().findFirst().get(), p1, 
+                "Test findFirst");
         checkEqual(RosterWithStreams.empty()
-                .stream().findFirst(), Optional.empty(), "Test findFirst");
+                .stream().findFirst(), Optional.empty(),
+                 "Test findFirst");
 
-        checkTrue(rosterWithStream.stream().findAny().isPresent(), "Test findAny");
+        checkTrue(rosterWithStream.stream().findAny().isPresent(), 
+            "Test findAny");
         checkTrue(!RosterWithStreams.empty()
-                .stream().findAny().isPresent(), "Test findAny");
-        checkEqual(rosterWithStream.stream().filter(Player::available).count(),
-                (long) rosterWithStream.readyCount(), "Test Stream filter");
+                .stream().findAny().isPresent(), 
+                "Test findAny");
+        checkEqual(rosterWithStream.stream()
+            .filter(Player::available).count(),
+                (long) rosterWithStream.readyCount(),
+                 "Test Stream filter");
 
         assertStreamEquals(rosterWithStream.stream().distinct()
                 , rosterWithStream.stream());
@@ -52,13 +64,15 @@ public class TestRosterWithStream {
         testMapReduce(rosterWithStream);
         testToArray(rosterWithStream);
         checkEqual(rosterWithStream.stream().skip(2).count(),
-                rosterWithStream.stream().count() - 2,"Test Stream skip");
+                rosterWithStream.stream().count() - 2,
+                "Test Stream skip");
         testFunctions(); // test other methods
     }
 
     static int testCount; // Test count
     //Given: the lists and the name of this test
-    //Effect testCount add1 and if the given lists are not equal, printing the error msg
+    //Effect testCount add1 and 
+    //if the given lists are not equal, printing the error msg
     private static <T> void checkEqual(T s1, T s2, String name) {
         testCount++;
         if (!s1.equals(s2)) {
@@ -68,7 +82,8 @@ public class TestRosterWithStream {
     }
 
 //    Given: a boolean and a string
-//    Effect: testCount add 1 iff result is true else print the test fail msg
+//    Effect: testCount add 1 iff result is true 
+//    else print the test fail msg
     private static void checkTrue(Boolean result, String name) {
         testCount++;
         if (!result) {
@@ -86,13 +101,16 @@ public class TestRosterWithStream {
 
     static void testForEach(RosterWithStream rosterWithStream) {
         StringBuilder builder1 = new StringBuilder();
-        rosterWithStream.stream().forEach(p -> builder1.append(p.toString()));
+        rosterWithStream.stream()
+        .forEach(p -> builder1.append(p.toString()));
+
         Iterator<Player> iterator = rosterWithStream.stream().iterator();
         StringBuilder builder2 = new StringBuilder();
         while (iterator.hasNext()) {
             builder2.append(iterator.next().toString());
         }
-        checkEqual(builder1.toString(), builder2.toString(), "Test forEach");
+        checkEqual(builder1.toString(), builder2.toString(),
+         "Test forEach");
     }
 
     static void testMap(RosterWithStream rosterWithStream) {
@@ -116,7 +134,8 @@ public class TestRosterWithStream {
 
     static void testToArray(RosterWithStream rosterWithStream){
         Object[] players =  rosterWithStream.stream().toArray();
-        checkEqual(rosterWithStream.stream().count(),(long)players.length,"Test ToArray");
+        checkEqual(rosterWithStream.stream().count(),(
+            long)players.length,"Test ToArray");
         Iterator<Player> iterator = rosterWithStream.iterator();
         int i = 0;
         while (iterator.hasNext()){
@@ -151,37 +170,54 @@ public class TestRosterWithStream {
         RosterWithStream r = RosterWithStreams.empty();
         Player p = Players.make("Xiao ming");
         r = r.with(p);
-        checkEqual(r.with(p).with(p), r.with(p), "Test with()");
+        checkEqual(r.with(p).with(p), r.with(p),
+         "Test with()");
 
         checkEqual(RosterWithStreams.empty().without(p),
                 RosterWithStreams.empty(), "Test without()");
-        checkEqual(r.without(p).without(p), r.without(p), "Test without()");
+        checkEqual(r.without(p).without(p), r.without(p),
+         "Test without()");
 
-        checkTrue(!RosterWithStreams.empty().has(p), "Test has()");
+        checkTrue(!RosterWithStreams.empty().has(p), 
+            "Test has()");
 
-        checkTrue(RosterWithStreams.empty().with(p).has(p), "Test has()");
+        checkTrue(RosterWithStreams.empty().with(p).has(p), 
+            "Test has()");
 
-        checkTrue(!RosterWithStreams.empty().with(p).without(p).has(p), "Test has()");
+        checkTrue(!RosterWithStreams.empty().with(p).without(p).has(p),
+         "Test has()");
 
-        checkEqual(RosterWithStreams.empty().size(), 0, "Test size()");
-        checkEqual(RosterWithStreams.empty().without(p).size(), 0, "Test size()");
-        checkEqual(RosterWithStreams.empty().with(p).without(p).size(), 0, "Test size()");
-        checkEqual(RosterWithStreams.empty().with(p).size(), 1, "Test size()");
-        checkEqual(RosterWithStreams.empty().with(p).with(p).size(), 1, "Test size()");
+        checkEqual(RosterWithStreams.empty().size(), 0, 
+            "Test size()");
+        checkEqual(RosterWithStreams.empty().without(p).size(), 0, 
+            "Test size()");
+        checkEqual(RosterWithStreams.empty().with(p).without(p).size(), 0, 
+            "Test size()");
+        checkEqual(RosterWithStreams.empty().with(p).size(), 1,
+         "Test size()");
+        checkEqual(RosterWithStreams.empty().with(p).with(p).size(), 1,
+         "Test size()");
 
         RosterWithStream allReady = RosterWithStreams.empty();
 
         RosterWithStream someReady = RosterWithStreams.empty();
 
-        checkEqual(allReady.readyCount(), allReady.size(), "Test readyCount()");
-        checkEqual(someReady.readyCount(), allReady.size(), "Test readyCount()");
-        checkEqual(allReady.readyRoster(), allReady, "Test readyRoster()");
-        checkEqual(someReady.readyRoster(), allReady, "Test readyRoster()");
+        checkEqual(allReady.readyCount(), allReady.size(),
+         "Test readyCount()");
+        checkEqual(someReady.readyCount(), allReady.size(), 
+            "Test readyCount()");
+        checkEqual(allReady.readyRoster(), allReady, 
+            "Test readyRoster()");
+        checkEqual(someReady.readyRoster(), allReady, 
+            "Test readyRoster()");
 
         List<String> names = new ArrayList<>();
         for (Player player : allReady)
             names.add(player.name());
-        checkEqual(names.stream().sorted().collect(Collectors.toList()), names, "Test Iterator");
+        checkEqual(names.stream().sorted().
+            collect(Collectors.toList()), names, 
+            "Test Iterator");
+
         System.out.println("Test passed: " + testCount);
     }
 }

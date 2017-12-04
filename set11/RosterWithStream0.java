@@ -10,7 +10,8 @@ import java.util.stream.*;
 // empty roster.
 
 final public class RosterWithStream0 implements RosterWithStream {
-    final private Set<Player> players; // a immutable list of players of this roster
+    // a immutable list of players of this roster
+    final private Set<Player> players; 
 
     public RosterWithStream0(Set<Player> players) {
         this.players = players;
@@ -111,7 +112,8 @@ final public class RosterWithStream0 implements RosterWithStream {
                 .collect(Collectors.toList()).stream();
     }
 
-    //Returns true if o is Roster, and o and this roster have the same players
+    //Returns true if o is Roster, 
+    //and o and this roster have the same players
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
