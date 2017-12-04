@@ -85,8 +85,6 @@ public class Player0 implements Player, Comparable {
         return this == o;
     }
 
-
-
     @Override
     public String toString() {
         return "Player{" +
@@ -98,7 +96,15 @@ public class Player0 implements Player, Comparable {
                 '}';
     }
 
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
     // Implemented the comparable interface
+    // Given an Object
+    // Return: 0 if the given one is equal to this, -1 if the name of this is equal
+    // to or less than the given one, otherwise 1
     @Override
     public int compareTo(Object o) throws ClassCastException {
         if (!(o instanceof Player))
@@ -106,8 +112,8 @@ public class Player0 implements Player, Comparable {
         Player player = (Player) o;
         if (this.equals(player))
             return 0;
-        else {
-            return n.compareTo(player.name());
-        }
+        else if(n.equals(player.name()))
+            return -1;
+        else return n.compareTo(player.name());
     }
 }
