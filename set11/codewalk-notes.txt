@@ -1,0 +1,32 @@
+TA-1 Name: Vinod
+TA-2 Name: Yasaman
+
+Student CCIS ID: zerowxm
+
+Problem Set #: set11
+Question Codewalked: 1,2
+
+Q1 Design Grade: - AB
+Q1 Presentation Grade: - A
+
+Q2 Design Grade: - A
+Q2 Presentation Grade: - A
+
+================
+
+Presentation:
+
+
+================
+
+Interfaces, Objects, and Classes
+
+-- final only protects the set from being reassigned. if you pass a set to constructor and change it later, it makes the roster mutable.
+
+-- roster equals method : shouldn't check the class. must work for any roster that implements rosterWithStream interface
+
+================
+
+
+
+
