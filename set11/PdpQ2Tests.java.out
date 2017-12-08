@@ -29,43 +29,19 @@ Test readyRoster() Pass
 Test readyRoster() Pass
 Test Iterator Pass
 Test passed: 48
-Running test: enough calls to allMatch... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to anyMatch... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to count... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to distinct... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to filter... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to findAny... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to findFirst... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to forEach... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to map... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to reduce... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to skip... FAIL
-  actual:   false
-  expected: true
-Running test: enough calls to toArray... FAIL
-  actual:   false
-  expected: true
+Running test: enough calls to allMatch... PASS
+Running test: enough calls to anyMatch... PASS
+Running test: enough calls to count... PASS
+Running test: enough calls to distinct... PASS
+Running test: enough calls to filter... PASS
+Running test: enough calls to findAny... PASS
+Running test: enough calls to findFirst... PASS
+Running test: enough calls to forEach... PASS
+Running test: enough calls to map... PASS
+Running test: enough calls to reduce... PASS
+Running test: enough calls to skip... PASS
+Running test: enough calls to toArray... PASS
 Running test: main runs without errors 1/3... PASS
 Running test: main runs without errors 2/3... PASS
 Running test: main runs without errors 3/3... PASS
-3 success(es) 12 failure(s) 0 error(s) 15 test(s) run
+15 success(es) 0 failure(s) 0 error(s) 15 test(s) run
